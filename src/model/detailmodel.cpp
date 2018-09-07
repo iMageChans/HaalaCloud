@@ -38,8 +38,6 @@ QVariant DetailModel::headerData(int section, Qt::Orientation orientation, int r
                 return QStringLiteral("大小（字节）");
         }
     }
-    default:
-        return QVariant();
     }
 
     return QVariant();
@@ -100,7 +98,19 @@ bool DetailModel::setData(const QModelIndex &index, const QVariant &value, int r
 
         return true;
     }
+#if defined(Q_OS_MAC)
     case Qt::CheckStateRole:
+    {
+        if (nColumn == 0)
+        {
+            record.bChecked = (value.toInt() == Qt::Checked);
+
+            m_recordList.replace(index.row(), record);
+            emit dataChanged(index, index);
+            return true;
+        }
+    }
+#elif defined(Q_OS_WIN32)
     case Qt::UserRole:
     {
         if (nColumn == 0)
@@ -109,11 +119,13 @@ bool DetailModel::setData(const QModelIndex &index, const QVariant &value, int r
 
             m_recordList.replace(index.row(), record);
             emit dataChanged(index, index);
+
+            if (role == Qt::UserRole)
+                onStateChanged();
             return true;
         }
     }
-    default:
-        return false;
+#endif
     }
     return false;
 }
@@ -153,20 +165,26 @@ QVariant DetailModel::data(const QModelIndex &index, int role) const
             }
             return "";
         }
+#if defined(Q_OS_MAC)
+        case Qt::CheckStateRole:
+        {
+            if (nColumn == 0)
+                return record.bChecked ? Qt::Checked : Qt::Unchecked;
+        }
+#elif defined(Q_OS_WIN32)
         case Qt::UserRole:
         {
             if (nColumn == 0)
                 return record.bChecked;
         }
-        default:
-            return QVariant();
+#endif
         }
-
         return QVariant();
 }
 
 Qt::ItemFlags DetailModel::flags(const QModelIndex &index) const
 {
+#if defined(Q_OS_MAC)
     if (!index.isValid())
         return QAbstractItemModel::flags(index);
 
@@ -175,6 +193,14 @@ Qt::ItemFlags DetailModel::flags(const QModelIndex &index) const
         flags |= Qt::ItemIsUserCheckable;
 
     return flags;
+#elif defined(Q_OS_WIN32)
+    if (!index.isValid())
+        return QAbstractItemModel::flags(index);
+
+    Qt::ItemFlags flags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+
+    return flags;
+#endif
 }
 
 void DetailModel::onStateChanged()

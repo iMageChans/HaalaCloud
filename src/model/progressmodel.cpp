@@ -34,8 +34,6 @@ QVariant ProgressModel::headerData(int section, Qt::Orientation orientation, int
                     return QStringLiteral("操作");
             }
         }
-        default:
-            return QVariant();
     }
     return QVariant();
 }

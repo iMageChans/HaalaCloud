@@ -78,17 +78,20 @@ MainWindow::MainWindow(QWidget *parent) :
     FilesHeaderView *pHeader = new FilesHeaderView(Qt::Horizontal, this);
     CheckBoxDelegate *pDelegate = new CheckBoxDelegate(this);
 
+    content->Files->TableView->setHorizontalHeader(pHeader);
     pProxyModel->setSourceModel(pModel);
     content->Files->TableView->setModel(pProxyModel);
     content->Files->TableView->setSortingEnabled(true);
-    content->Files->TableView->setHorizontalHeader(pHeader);
     content->Files->TableView->setItemDelegate(pDelegate);
     pHeader->setSectionResizeMode(QHeaderView::Stretch);
     pHeader->setSectionResizeMode(0, QHeaderView::Fixed);
+	pHeader->setSectionResizeMode(2, QHeaderView::Fixed);
+	pHeader->setSectionResizeMode(3, QHeaderView::Fixed);
 
     content->Files->TableView->setColumnWidth(0, 30);
+	content->Files->TableView->setColumnWidth(2, 250);
+	content->Files->TableView->setColumnWidth(3, 110);
     content->Files->TableView->setColumnHidden(4, true);
-    content->Files->TableView->sortByColumn(3, Qt::AscendingOrder);
 
     connect(pModel, SIGNAL(stateChanged(int)), pHeader, SLOT(onStateChanged(int)));
     connect(pHeader, SIGNAL(stateChanged(int)), pModel, SLOT(onStateChanged(int)));
