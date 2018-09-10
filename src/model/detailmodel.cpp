@@ -101,17 +101,23 @@ bool DetailModel::setData(const QModelIndex &index, const QVariant &value, int r
         return true;
     }
     case Qt::CheckStateRole:
-    case Qt::UserRole:
     {
-        if (nColumn == 0)
-        {
-            record.bChecked = value.toBool();
-
-            m_recordList.replace(index.row(), record);
-            emit dataChanged(index, index);
+        if (nColumn == 0){
+            check_state_map[index.row()] = (value == Qt::Checked ? Qt::Checked : Qt::Unchecked);
             return true;
         }
     }
+//    case Qt::UserRole:
+//    {
+//        if (nColumn == 0)
+//        {
+//            record.bChecked = value.toBool();
+
+//            m_recordList.replace(index.row(), record);
+//            emit dataChanged(index, index);
+//            return true;
+//        }
+//    }
     default:
         return false;
     }
@@ -153,11 +159,20 @@ QVariant DetailModel::data(const QModelIndex &index, int role) const
             }
             return "";
         }
-        case Qt::UserRole:
+        case Qt::CheckStateRole:
         {
-            if (nColumn == 0)
-                return record.bChecked;
+            if (nColumn == 0){
+                if (check_state_map.contains(index.row())){
+                    return check_state_map[index.row()] == Qt::Checked ? Qt::Checked : Qt::Unchecked;
+                }
+                return Qt::Unchecked;
+            }
         }
+//        case Qt::UserRole:
+//        {
+//            if (nColumn == 0)
+//                return record.bChecked;
+//        }
         default:
             return QVariant();
         }
@@ -170,11 +185,10 @@ Qt::ItemFlags DetailModel::flags(const QModelIndex &index) const
     if (!index.isValid())
         return QAbstractItemModel::flags(index);
 
-    Qt::ItemFlags flags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
-    if (index.column() == 0)
-        flags |= Qt::ItemIsUserCheckable;
-
-    return flags;
+    if (index.column() == 0){
+        return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable;
+    }
+    return Qt::ItemIsEnabled | Qt::ItemIsSelectable;;
 }
 
 void DetailModel::onStateChanged()

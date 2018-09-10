@@ -3,6 +3,7 @@
 
 #include <QAbstractItemModel>
 #include <QDateTime>
+#include <QMap>
 
 typedef struct{
     QString FileName;
@@ -37,6 +38,7 @@ public:
 
 private:
     QList<FilesInfo> m_recordList;
+    QMap<int, int> check_state_map;
 
 public slots:
     void onStateChanged();
