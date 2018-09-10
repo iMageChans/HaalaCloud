@@ -39,7 +39,8 @@ SOURCES += \
     src/Delegate/checkboxdelegate.cpp \
     src/model/sortfilterproxymodel.cpp \
     src/util/tool.cpp \
-    src/util/request.cpp
+    src/util/request.cpp \
+    src/util/configsetting.cpp
 
 HEADERS += \
         src/Widget/mainwindow.h \
@@ -58,7 +59,8 @@ HEADERS += \
     src/util/toolclass.h \
     src/model/sortfilterproxymodel.h \
     src/util/tool.h \
-    src/util/request.h
+    src/util/request.h \
+    src/util/configsetting.h
 
 FORMS += \
         src/Widget/mainwindow.ui \
