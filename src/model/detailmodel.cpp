@@ -1,11 +1,10 @@
 ﻿#include "detailmodel.h"
-#include "src/util/toolclass.h"
-
 #include <QColor>
 
 DetailModel::DetailModel(QObject *parent)
     : QAbstractItemModel(parent)
 {
+    tool = new Tool;
 }
 
 void DetailModel::updateData(QList<FilesInfo> recordList)
@@ -45,6 +44,8 @@ QVariant DetailModel::headerData(int section, Qt::Orientation orientation, int r
 
 QModelIndex DetailModel::index(int row, int column, const QModelIndex &parent) const
 {
+    if (!parent.isValid())
+        return createIndex(row, column);
     return createIndex(row, column);
 }
 
@@ -55,11 +56,15 @@ QModelIndex DetailModel::parent(const QModelIndex &index) const
 
 int DetailModel::rowCount(const QModelIndex &parent) const
 {
+    if (!parent.isValid())
+        return m_recordList.count();
     return m_recordList.count();
 }
 
 int DetailModel::columnCount(const QModelIndex &parent) const
 {
+    if (!parent.isValid())
+        return 5;
     return 5;
 }
 
@@ -111,6 +116,7 @@ bool DetailModel::setData(const QModelIndex &index, const QVariant &value, int r
         }
     }
 #elif defined(Q_OS_WIN32)
+    case Qt::CheckStateRole:
     case Qt::UserRole:
     {
         if (nColumn == 0)
@@ -153,7 +159,7 @@ QVariant DetailModel::data(const QModelIndex &index, int role) const
             }
             else if (nColumn == 2)
             {
-                return bytesToGBMBKB(record.Size);
+                return tool->bytesToGBMBKB(record.Size);
             }
             else if (nColumn == 3)
             {

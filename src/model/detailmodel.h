@@ -4,6 +4,8 @@
 #include <QAbstractItemModel>
 #include <QDateTime>
 
+#include "src/util/tool.h"
+
 typedef struct{
     QString FileName;
     qint64  Size;
@@ -37,6 +39,7 @@ public:
 
 private:
     QList<FilesInfo> m_recordList;
+    Tool *tool;
 
 public slots:
     void onStateChanged();

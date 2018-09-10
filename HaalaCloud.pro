@@ -26,7 +26,6 @@ SOURCES += \
         src/main.cpp \
         src/Widget/mainwindow.cpp \
         src/Widget/login.cpp \
-        src/util/network.cpp \
         src/Widget/detail.cpp \
         src/Widget/content.cpp \
         src/Widget/mitcontent.cpp \
@@ -38,12 +37,13 @@ SOURCES += \
     src/model/detailmodel.cpp \
     src/Widget/filesheaderview.cpp \
     src/Delegate/checkboxdelegate.cpp \
-    src/model/sortfilterproxymodel.cpp
+    src/model/sortfilterproxymodel.cpp \
+    src/util/tool.cpp \
+    src/util/request.cpp
 
 HEADERS += \
         src/Widget/mainwindow.h \
         src/Widget/login.h \
-        src/util/network.h \
         src/Widget/detail.h \
         src/Widget/content.h \
         src/Widget/mitcontent.h \
@@ -56,7 +56,9 @@ HEADERS += \
     src/Widget/filesheaderview.h \
     src/Delegate/checkboxdelegate.h \
     src/util/toolclass.h \
-    src/model/sortfilterproxymodel.h
+    src/model/sortfilterproxymodel.h \
+    src/util/tool.h \
+    src/util/request.h
 
 FORMS += \
         src/Widget/mainwindow.ui \
