@@ -2,8 +2,17 @@
 #define PROGRESSMODEL_H
 
 #include <QJsonObject>
-
 #include <QAbstractItemModel>
+
+#include "src/util/tool.h"
+
+typedef struct{
+    QString FileName;
+    qint64  Size;
+    int nStatus;
+    int nProgress;
+    bool bChecked;
+}FilesStatusInfo;
 
 class ProgressModel : public QAbstractItemModel
 {
@@ -23,12 +32,22 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
+    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    Qt::ItemFlags flags(const QModelIndex &index) const override;
 
-    void updateData(QList<QJsonObject> recordList);
+    void updateData(QList<FilesStatusInfo> recordList);
 
 private:
-    QList<QJsonObject> m_recordList;
+    QList<FilesStatusInfo> m_recordList;
+    Tool *tool;
+
+public slots:
+    void onStateChanged();
+    void onStateChanged(int state);
+
+signals:
+    void stateChanged(int state);
 };
 
 #endif // PROGRESSMODEL_H

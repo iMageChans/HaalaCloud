@@ -1,7 +1,8 @@
-#ifndef PROGRESSLIST_H
+﻿#ifndef PROGRESSLIST_H
 #define PROGRESSLIST_H
 
 #include <QWidget>
+#include <QTableView>
 
 namespace Ui {
 class ProgressList;
@@ -14,6 +15,8 @@ class ProgressList : public QWidget
 public:
     explicit ProgressList(QWidget *parent = nullptr);
     ~ProgressList();
+
+    QTableView *TableView;
 
 private:
     Ui::ProgressList *ui;

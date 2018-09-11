@@ -5,6 +5,8 @@
 #include <QDateTime>
 #include <QMap>
 
+#include "src/util/tool.h"
+
 typedef struct{
     QString FileName;
     qint64  Size;

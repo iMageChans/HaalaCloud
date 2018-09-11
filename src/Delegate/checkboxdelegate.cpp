@@ -27,9 +27,8 @@ void CheckBoxDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
         checkBoxStyle.state = data ? QStyle::State_On : QStyle::State_Off;
         checkBoxStyle.state |= QStyle::State_Enabled;
         checkBoxStyle.iconSize = QSize(12, 12);
-//        checkBoxStyle.rect = QRect(option.rect.center().x() - 6, option.rect.center().y() - 6, 12, 12);
+        checkBoxStyle.rect = QRect(option.rect.center().rx() - 6, option.rect.center().ry() - 6, 12, 12);
 
-        checkBoxStyle.rect = option.rect;
 
         QCheckBox checkBox;
         QApplication::style()->drawPrimitive(QStyle::PE_IndicatorCheckBox, &checkBoxStyle, painter, &checkBox);

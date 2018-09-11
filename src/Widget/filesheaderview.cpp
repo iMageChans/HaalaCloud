@@ -48,6 +48,7 @@ void FilesHeaderView::paintSection(QPainter *painter, const QRect &rect, int log
             option.state |= QStyle::State_NoChange;
         else
             option.state |= m_bChecked ? QStyle::State_On : QStyle::State_Off;
+
         if (testAttribute(Qt::WA_Hover) && underMouse()) {
             if (m_bMoving)
                 option.state |= QStyle::State_MouseOver;
@@ -66,29 +67,22 @@ void FilesHeaderView::mousePressEvent(QMouseEvent *event)
 {
     int nColumn = logicalIndexAt(event->pos());
     if ((event->buttons() & Qt::LeftButton) && (nColumn == 0))
-    {
         m_bPressed = true;
-    }
     else
-    {
         QHeaderView::mousePressEvent(event);
-    }
 }
 
 void FilesHeaderView::mouseReleaseEvent(QMouseEvent *event)
 {
     if (m_bPressed)
     {
-        if (m_bTristate && m_bNoChange)
-        {
+        if (m_bTristate && m_bNoChange){
             m_bChecked = true;
             m_bNoChange = false;
         }
-        else
-        {
+        else{
             m_bChecked = !m_bChecked;
         }
-
         update();
 
         Qt::CheckState state = m_bChecked ? Qt::Checked : Qt::Unchecked;

@@ -1,11 +1,10 @@
 ﻿#include "detailmodel.h"
-#include "src/util/toolclass.h"
-
 #include <QColor>
 
 DetailModel::DetailModel(QObject *parent)
     : QAbstractItemModel(parent)
 {
+    tool = new Tool;
 }
 
 void DetailModel::updateData(QList<FilesInfo> recordList)
@@ -38,8 +37,6 @@ QVariant DetailModel::headerData(int section, Qt::Orientation orientation, int r
                 return QStringLiteral("大小（字节）");
         }
     }
-    default:
-        return QVariant();
     }
 
     return QVariant();
@@ -47,6 +44,8 @@ QVariant DetailModel::headerData(int section, Qt::Orientation orientation, int r
 
 QModelIndex DetailModel::index(int row, int column, const QModelIndex &parent) const
 {
+    if (!parent.isValid())
+        return createIndex(row, column);
     return createIndex(row, column);
 }
 
@@ -57,11 +56,15 @@ QModelIndex DetailModel::parent(const QModelIndex &index) const
 
 int DetailModel::rowCount(const QModelIndex &parent) const
 {
+    if (!parent.isValid())
+        return m_recordList.count();
     return m_recordList.count();
 }
 
 int DetailModel::columnCount(const QModelIndex &parent) const
 {
+    if (!parent.isValid())
+        return 5;
     return 5;
 }
 
@@ -100,6 +103,19 @@ bool DetailModel::setData(const QModelIndex &index, const QVariant &value, int r
 
         return true;
     }
+#if defined(Q_OS_MAC)
+    case Qt::CheckStateRole:
+    {
+        if (nColumn == 0)
+        {
+            record.bChecked = (value.toInt() == Qt::Checked);
+
+            m_recordList.replace(index.row(), record);
+            emit dataChanged(index, index);
+            return true;
+        }
+    }
+#elif defined(Q_OS_WIN32)
     case Qt::CheckStateRole:
     {
         if (nColumn == 0){
@@ -147,7 +163,7 @@ QVariant DetailModel::data(const QModelIndex &index, int role) const
             }
             else if (nColumn == 2)
             {
-                return bytesToGBMBKB(record.Size);
+                return tool->bytesToGBMBKB(record.Size);
             }
             else if (nColumn == 3)
             {
@@ -160,14 +176,14 @@ QVariant DetailModel::data(const QModelIndex &index, int role) const
             return "";
         }
         case Qt::CheckStateRole:
+#if defined(Q_OS_MAC)
+        case Qt::CheckStateRole:
         {
-            if (nColumn == 0){
-                if (check_state_map.contains(index.row())){
-                    return check_state_map[index.row()] == Qt::Checked ? Qt::Checked : Qt::Unchecked;
-                }
-                return Qt::Unchecked;
-            }
+            if (nColumn == 0)
+                return record.bChecked ? Qt::Checked : Qt::Unchecked;
         }
+#elif defined(Q_OS_WIN32)
+        case Qt::UserRole:
 //        case Qt::UserRole:
 //        {
 //            if (nColumn == 0)
@@ -175,20 +191,30 @@ QVariant DetailModel::data(const QModelIndex &index, int role) const
 //        }
         default:
             return QVariant();
+#endif
         }
-
         return QVariant();
 }
 
 Qt::ItemFlags DetailModel::flags(const QModelIndex &index) const
 {
+#if defined(Q_OS_MAC)
     if (!index.isValid())
         return QAbstractItemModel::flags(index);
 
-    if (index.column() == 0){
-        return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable;
-    }
-    return Qt::ItemIsEnabled | Qt::ItemIsSelectable;;
+    Qt::ItemFlags flags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+    if (index.column() == 0)
+        flags |= Qt::ItemIsUserCheckable;
+
+    return flags;
+#elif defined(Q_OS_WIN32)
+    if (!index.isValid())
+        return QAbstractItemModel::flags(index);
+
+    Qt::ItemFlags flags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+
+    return flags;
+#endif
 }
 
 void DetailModel::onStateChanged()
