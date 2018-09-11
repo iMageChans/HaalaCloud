@@ -3,6 +3,7 @@
 
 #include <QAbstractItemModel>
 #include <QDateTime>
+#include <QMap>
 
 #include "src/util/tool.h"
 
@@ -39,7 +40,7 @@ public:
 
 private:
     QList<FilesInfo> m_recordList;
-    Tool *tool;
+    QMap<int, int> check_state_map;
 
 public slots:
     void onStateChanged();

@@ -117,21 +117,25 @@ bool DetailModel::setData(const QModelIndex &index, const QVariant &value, int r
     }
 #elif defined(Q_OS_WIN32)
     case Qt::CheckStateRole:
-    case Qt::UserRole:
     {
-        if (nColumn == 0)
-        {
-            record.bChecked = value.toBool();
-
-            m_recordList.replace(index.row(), record);
-            emit dataChanged(index, index);
-
-            if (role == Qt::UserRole)
-                onStateChanged();
+        if (nColumn == 0){
+            check_state_map[index.row()] = (value == Qt::Checked ? Qt::Checked : Qt::Unchecked);
             return true;
         }
     }
-#endif
+//    case Qt::UserRole:
+//    {
+//        if (nColumn == 0)
+//        {
+//            record.bChecked = value.toBool();
+
+//            m_recordList.replace(index.row(), record);
+//            emit dataChanged(index, index);
+//            return true;
+//        }
+//    }
+    default:
+        return false;
     }
     return false;
 }
@@ -171,6 +175,7 @@ QVariant DetailModel::data(const QModelIndex &index, int role) const
             }
             return "";
         }
+        case Qt::CheckStateRole:
 #if defined(Q_OS_MAC)
         case Qt::CheckStateRole:
         {
@@ -179,10 +184,13 @@ QVariant DetailModel::data(const QModelIndex &index, int role) const
         }
 #elif defined(Q_OS_WIN32)
         case Qt::UserRole:
-        {
-            if (nColumn == 0)
-                return record.bChecked;
-        }
+//        case Qt::UserRole:
+//        {
+//            if (nColumn == 0)
+//                return record.bChecked;
+//        }
+        default:
+            return QVariant();
 #endif
         }
         return QVariant();

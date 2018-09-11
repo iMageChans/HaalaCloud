@@ -29,6 +29,7 @@ void CheckBoxDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
         checkBoxStyle.iconSize = QSize(12, 12);
         checkBoxStyle.rect = QRect(option.rect.center().rx() - 6, option.rect.center().ry() - 6, 12, 12);
 
+
         QCheckBox checkBox;
         QApplication::style()->drawPrimitive(QStyle::PE_IndicatorCheckBox, &checkBoxStyle, painter, &checkBox);
     }

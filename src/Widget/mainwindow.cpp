@@ -82,7 +82,8 @@ MainWindow::MainWindow(QWidget *parent) :
     pProxyModel->setSourceModel(pModel);
     content->Files->TableView->setModel(pProxyModel);
     content->Files->TableView->setSortingEnabled(true);
-    content->Files->TableView->setItemDelegate(pDelegate);
+    content->Files->TableView->setHorizontalHeader(pHeader);
+//    content->Files->TableView->setItemDelegate(pDelegate);
     pHeader->setSectionResizeMode(QHeaderView::Stretch);
     pHeader->setSectionResizeMode(0, QHeaderView::Fixed);
 	pHeader->setSectionResizeMode(2, QHeaderView::Fixed);
@@ -138,7 +139,7 @@ void MainWindow::on_myFiles_itemSelectionChanged()
     MitContent->hide();
     content->show();
 
-	for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 4; i++)
 	{
 		QListWidgetItem *item = ui->myMit->item(i);
 		item->setSelected(false);
