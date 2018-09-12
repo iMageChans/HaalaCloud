@@ -64,6 +64,7 @@ WebServiceHelp::WebServiceHelp(QObject *parent):QObject(parent)
 {
     manager = new QNetworkAccessManager();
     m_errCode= QNetworkReply::NoError;
+    baseUrl = "https://api.6pan.cn";
 }
 WebServiceHelp::~WebServiceHelp()
 {
@@ -77,13 +78,14 @@ WebServiceHelp *WebServiceHelp::getInstance()
     }
     return serverHelp;
 }
-QNetworkReply::NetworkError WebServiceHelp::sendGetRequest(QString urlStr, QByteArray & ba,int timeOutms)
+QNetworkReply::NetworkError WebServiceHelp::sendGetRequest(QString urlStr, QByteArray &ba,int timeOutms)
 {
     QNetworkReply::NetworkError retError = QNetworkReply::NoError;
     m_errCode= QNetworkReply::NoError;
     QNetworkRequest request;
-    QUrl url(urlStr);
+    QUrl url(QString("https://api.6pan.cn%1").arg(urlStr));
     request.setUrl(url);
+    request.setHeader(QNetworkRequest::ContentTypeHeader,"application/json");
     QNetworkReply *reply = manager->get(request);
     connect(reply,static_cast<void (QNetworkReply::*)(QNetworkReply::NetworkError)>(&QNetworkReply::error),this,&WebServiceHelp::slot_error);
     QEventLoop eventLoop;
@@ -107,6 +109,42 @@ QNetworkReply::NetworkError WebServiceHelp::sendGetRequest(QString urlStr, QByte
     m_errCode= QNetworkReply::NoError;
     return retError;
 }
+
+QNetworkReply::NetworkError WebServiceHelp::sendGetRequest(QString urlStr, QString Token,QByteArray &ba,int timeOutms)
+{
+    QNetworkReply::NetworkError retError = QNetworkReply::NoError;
+    m_errCode= QNetworkReply::NoError;
+    QByteArray bearer;
+    QNetworkRequest request;
+    QUrl url(QString("https://api.6pan.cn%1").arg(urlStr));
+    request.setUrl(url);
+    bearer.append("Bearer " + Token);
+    request.setRawHeader("Authorization", bearer);
+    request.setHeader(QNetworkRequest::ContentTypeHeader,"application/json");
+    QNetworkReply *reply = manager->get(request);
+    connect(reply,static_cast<void (QNetworkReply::*)(QNetworkReply::NetworkError)>(&QNetworkReply::error),this,&WebServiceHelp::slot_error);
+    QEventLoop eventLoop;
+    NetDataListenerThread * thread = new NetDataListenerThread(manager,reply,timeOutms);
+    connect(thread, &NetDataListenerThread::finished,&eventLoop,&QEventLoop::quit);
+    thread->start();
+    eventLoop.exec();
+    if(thread->getIsWaitTimeOut())
+    {
+        ba = reply->readAll();
+    }
+    else
+    {
+        m_errCode=QNetworkReply::TimeoutError;
+    }
+    thread->deleteLater();
+    delete reply;
+    delete thread;
+    thread = nullptr;
+    retError = m_errCode;
+    m_errCode= QNetworkReply::NoError;
+    return retError;
+}
+
 QNetworkReply::NetworkError WebServiceHelp:: sendPostRequest(QString website, const QByteArray &postBa, QByteArray &retBa, int timeOutms)
 {
     QString urlStr =website;
@@ -117,10 +155,50 @@ QNetworkReply::NetworkError WebServiceHelp:: sendPostRequest(QString website, co
     config.setPeerVerifyMode(QSslSocket::VerifyNone);
     config.setProtocol(QSsl::TlsV1SslV3);
     request.setSslConfiguration(config);
-    QUrl url(urlStr);
+    QUrl url(QString("https://api.6pan.cn%1").arg(urlStr));
+    request.setUrl(url);
+    request.setHeader(QNetworkRequest::ContentTypeHeader,"application/json");
+    QNetworkReply *reply = manager->post(request,postBa);
+    connect(reply,static_cast<void (QNetworkReply::*)(QNetworkReply::NetworkError)>(&QNetworkReply::error),this,&WebServiceHelp::slot_error);
+    QEventLoop eventLoop;
+    NetDataListenerThread * thread = new NetDataListenerThread(manager,reply,timeOutms);
+    connect(thread, &NetDataListenerThread::finished,&eventLoop,&QEventLoop::quit);
+    thread->start();
+    eventLoop.exec();
+    if(thread->getIsWaitTimeOut())
+    {
+        retBa = reply->readAll();
+    }
+    else
+    {
+        m_errCode=QNetworkReply::TimeoutError;
+    }
+    thread->deleteLater();
+    delete reply;
+    delete thread;
+    thread = nullptr;
+    retError = m_errCode;
+    m_errCode= QNetworkReply::NoError;
+    return retError;
+}
+
+QNetworkReply::NetworkError WebServiceHelp:: sendPostRequest(QString website, QString Token, const QByteArray &postBa, QByteArray &retBa, int timeOutms)
+{
+    QString urlStr =website;
+    QNetworkReply::NetworkError retError = QNetworkReply::NoError;
+    m_errCode= QNetworkReply::NoError;
+    QByteArray bearer;
+    QNetworkRequest request;
+    QSslConfiguration config;
+    config.setPeerVerifyMode(QSslSocket::VerifyNone);
+    config.setProtocol(QSsl::TlsV1SslV3);
+    request.setSslConfiguration(config);
+    QUrl url(QString("https://api.6pan.cn%1").arg(urlStr));
     request.setUrl(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader,"application/json");
     request.setHeader(QNetworkRequest::ContentLengthHeader,postBa.length());
+    bearer.append("Bearer " + Token);
+    request.setRawHeader("Authorization", bearer);
     QNetworkReply *reply = manager->post(request,postBa);
     connect(reply,static_cast<void (QNetworkReply::*)(QNetworkReply::NetworkError)>(&QNetworkReply::error),this,&WebServiceHelp::slot_error);
     QEventLoop eventLoop;

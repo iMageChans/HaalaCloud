@@ -54,6 +54,7 @@ public:
      * @return  返回错误代码
      */
     QNetworkReply::NetworkError sendGetRequest(QString urlStr, QByteArray & ba, int timeOutms=3000);
+    QNetworkReply::NetworkError sendGetRequest(QString urlStr, QString Token, QByteArray & ba, int timeOutms=3000);
     /**
      * @brief sendPostRequest 发送post请求
      * @param website  网址
@@ -66,7 +67,8 @@ public:
      * @param timeOutms 超时时间
      * @return 返回错误代码
      */
-    QNetworkReply::NetworkError sendPostRequest(QString website,const QByteArray & postBa, QByteArray& retBa, int timeOutms=3000);
+    QNetworkReply::NetworkError sendPostRequest(QString website, const QByteArray & postBa, QByteArray& retBa, int timeOutms=3000);
+    QNetworkReply::NetworkError sendPostRequest(QString website, QString Token, const QByteArray &postBa, QByteArray &retBa, int timeOutms=3000);
 protected slots:
     void slot_error(QNetworkReply::NetworkError code);
 private:
@@ -74,6 +76,8 @@ private:
     static WebServiceHelp::Dispose disp;
     QNetworkAccessManager *manager;
     QNetworkReply::NetworkError m_errCode;
+    QString baseUrl;
+
 private:
     WebServiceHelp(QObject *parent=0);
 };

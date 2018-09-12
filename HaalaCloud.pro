@@ -40,7 +40,9 @@ SOURCES += \
     src/model/sortfilterproxymodel.cpp \
     src/util/tool.cpp \
     src/util/request.cpp \
-    src/util/configsetting.cpp
+    src/util/configsetting.cpp \
+    src/model/usermodel.cpp \
+    src/Widget/messagebox.cpp
 
 HEADERS += \
         src/Widget/mainwindow.h \
@@ -60,7 +62,9 @@ HEADERS += \
     src/model/sortfilterproxymodel.h \
     src/util/tool.h \
     src/util/request.h \
-    src/util/configsetting.h
+    src/util/configsetting.h \
+    src/model/usermodel.h \
+    src/Widget/messagebox.h
 
 FORMS += \
         src/Widget/mainwindow.ui \
@@ -68,7 +72,8 @@ FORMS += \
         src/Widget/detail.ui \
     src/Widget/trash.ui \
     src/Widget/progresslist.ui \
-    src/Widget/clearlist.ui
+    src/Widget/clearlist.ui \
+    src/Widget/messagebox.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

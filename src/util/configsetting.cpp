@@ -4,17 +4,17 @@
 
 ConfigSetting::ConfigSetting()
 {
-    UserInfo = "UserInfo";
+
 }
 
 QString ConfigSetting::SystemPath(){
 #ifdef Q_OS_MAC
     {
-        return QDir::homePath() + "/Library/Preferences/com.HalalCloud.plist";
+        return QDir::homePath() + "/Library/Preferences/com.HaalalCloud.plist";
     }
 #else
     {
-        return "HKEY_CURRENT_USER\\Software\\Microsoft\\HalalCloud";
+        return "HKEY_CURRENT_USER\\Software\\Microsoft\\HaalalCloud";
     }
 #endif
 }
@@ -22,7 +22,7 @@ QString ConfigSetting::SystemPath(){
 void ConfigSetting::setSystemConfig(const QString &key, const QString &value)
 {
     QSettings settings(SystemPath(), QSettings::NativeFormat);
-    settings.beginGroup(UserInfo);
+    settings.beginGroup(QString("UserInfo"));
     settings.setValue(key,value);
     settings.endGroup();
 }
@@ -30,8 +30,8 @@ void ConfigSetting::setSystemConfig(const QString &key, const QString &value)
 void ConfigSetting::deleteSystemConfig(const QString &key)
 {
     QSettings setting(SystemPath(),QSettings::NativeFormat);
-    if (setting.contains(UserInfo.arg("/").arg(key))){
-        setting.beginGroup(UserInfo);
+    if (setting.contains(QString("UserInfo%1%2").arg("/").arg(key))){
+        setting.beginGroup(QString("UserInfo"));
         setting.remove(key);
         setting.endGroup();
     }
@@ -40,9 +40,9 @@ void ConfigSetting::deleteSystemConfig(const QString &key)
 QString ConfigSetting::getSystemConfig(const QString &key)
 {
     QSettings settings(SystemPath(), QSettings::NativeFormat);
-    QString value = settings.value(UserInfo.arg("/").arg(key)).toString();
-    if (settings.contains(UserInfo.arg("/").arg(key))){
-        value = settings.value(UserInfo.arg("/").arg(key)).toString();
+    QString value = settings.value(QString("UserInfo%1%2").arg("/").arg(key)).toString();
+    if (settings.contains(QString("UserInfo%1%2").arg("/").arg(key))){
+        value = settings.value(QString("UserInfo%1%2").arg("/").arg(key)).toString();
     }
     return value;
 }

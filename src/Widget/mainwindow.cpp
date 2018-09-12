@@ -2,7 +2,13 @@
 #include "ui_mainwindow.h"
 #include "src/Widget/filesheaderview.h"
 #include "src/Delegate/checkboxdelegate.h"
+#include "src/util/tool.h"
+#include "src/util/request.h"
+#include "src/Widget/login.h"
 
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QNetworkReply>
 #include <QListWidgetItem>
 #include <QPixmap>
 #include <QPainter>
@@ -19,6 +25,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    setting = new ConfigSetting;
 
     QPixmap allFiles(QString(":/assets/assets/image.png"));
     QPixmap MyImage(QString(":/assets/assets/image.png"));
@@ -61,17 +69,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->MainLayout->addWidget(content,0,2);
 	ui->MainLayout->setSpacing(0);
 	ui->MainLayout->setMargin(0);
-
-    QPixmap pixmapa(":/assets/assets/2.png");
-    QPixmap pixmap(75,75);
-    pixmap.fill(Qt::transparent);
-    QPainter painter(&pixmap);
-    painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
-    QPainterPath path;
-    path.addEllipse(0, 0, 75, 75);
-    painter.setClipPath(path);
-    painter.drawPixmap(0, 0, 75, 75, pixmapa);
-    ui->icon->setPixmap(pixmap);
 
     pModel = new DetailModel;
     pProxyModel = new SortFilterProxyModel(this);
@@ -117,6 +114,28 @@ MainWindow::MainWindow(QWidget *parent) :
     pModel->updateData(FilesList);
 }
 
+void MainWindow::setUserInfo(User user)
+{
+    QPixmap pixmapa(":/assets/assets/2.png");
+    QPixmap pixmap(75,75);
+    pixmap.fill(Qt::transparent);
+    QPainter painter(&pixmap);
+    painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
+    QPainterPath path;
+    path.addEllipse(0, 0, 75, 75);
+    painter.setClipPath(path);
+    painter.drawPixmap(0, 0, 75, 75, pixmapa);
+    ui->icon->setPixmap(pixmap);
+
+    ui->name->setText(user.result.name);
+
+    ui->progressBar->setRange(0, int(user.result.spaceCapacity));
+    ui->progressBar->setValue(int(user.result.spaceUsed));
+
+    Tool *tool = new Tool;
+    ui->capacity->setText(QString("%1/%2").arg(user.result.spaceUsed / 1024).arg(tool->bytesToGBMBKB(user.result.spaceCapacity)));
+}
+
 void MainWindow::onClicked(const QModelIndex &index)
 {
     if (index.isValid())
@@ -155,4 +174,29 @@ void MainWindow::on_myMit_itemSelectionChanged()
 		QListWidgetItem *item = ui->myFiles->item(i);
 		item->setSelected(false);
 	}
+}
+
+void MainWindow::on_loginOut_clicked()
+{
+    QDateTime time = QDateTime::currentDateTime();
+    qint64 ptime = time.toTime_t();
+    QByteArray ba;
+    QByteArray postBa;
+    QJsonObject Json;
+    Json.insert("time", ptime);
+    QJsonDocument docum;
+    docum.setObject(Json);
+    postBa = docum.toJson(QJsonDocument::Compact);
+
+    QNetworkReply::NetworkError ret= WebServiceHelp::getInstance()->sendPostRequest("/v1/user/logout", setting->getSystemConfig("token"), postBa, ba);
+    if(ret==QNetworkReply::NoError){
+        setting->setSystemConfig("Remember", QString::number(0));
+        setting->setSystemConfig("AotuLogin", QString::number(0));
+        setting->deleteSystemConfig("token");
+        Login *login = new Login;
+        login->show();
+        this->close();
+    }else{
+        qDebug() << QStringLiteral("%1 error:%2").arg("/v1/user/logout").arg(ret);
+    }
 }

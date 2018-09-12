@@ -6,6 +6,8 @@
 #include "mitcontent.h"
 #include "src/model/detailmodel.h"
 #include "src/model/sortfilterproxymodel.h"
+#include "src/model/usermodel.h"
+#include "src/util/configsetting.h"
 
 namespace Ui {
 class MainWindow;
@@ -19,6 +21,8 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    void setUserInfo(User user);
+
 private slots:
     void on_myFiles_itemSelectionChanged();
 
@@ -26,12 +30,15 @@ private slots:
 
     void onClicked(const QModelIndex &index);
 
+    void on_loginOut_clicked();
+
 private:
     Ui::MainWindow *ui;
     Content *content;
 	mitContent *MitContent;
     DetailModel *pModel;
     SortFilterProxyModel *pProxyModel;
+    ConfigSetting *setting;
 
     QList<FilesInfo> FilesList;
 };
