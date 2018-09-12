@@ -439,6 +439,9 @@ text-align: left;</string>
                          <height>16777215</height>
                         </size>
                        </property>
+                       <property name="focusPolicy">
+                        <enum>Qt::NoFocus</enum>
+                       </property>
                        <property name="styleSheet">
                         <string notr="true">QListWidget{
 	border:none;
@@ -530,6 +533,9 @@ text-align: left;</string>
                      </property>
                      <item>
                       <widget class="QListWidget" name="myMit">
+                       <property name="focusPolicy">
+                        <enum>Qt::NoFocus</enum>
+                       </property>
                        <property name="styleSheet">
                         <string notr="true">QListWidget{
 	border:none;
