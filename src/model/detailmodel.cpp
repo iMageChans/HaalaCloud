@@ -7,7 +7,7 @@ DetailModel::DetailModel(QObject *parent)
     tool = new Tool;
 }
 
-void DetailModel::updateData(QList<FilesInfo> recordList)
+void DetailModel::updateData(QList<FileInfo> recordList)
 {
     m_recordList = recordList;
     beginResetModel();
@@ -74,35 +74,35 @@ bool DetailModel::setData(const QModelIndex &index, const QVariant &value, int r
         return false;
 
     int nColumn = index.column();
-    FilesInfo record = m_recordList.at(index.row());
+    FileInfo record = m_recordList.at(index.row());
     switch (role)
     {
-    case Qt::DisplayRole:
-    {
-        if (nColumn == 1)
+        case Qt::DisplayRole:
         {
-            record.FileName = value.toString();
-        }
-        else if (nColumn == 2 || nColumn == 4)
-        {
-            record.Size = value.toLongLong();
-        }
-        else if (nColumn == 3)
-        {
-            record.ReviseTime = value.toDateTime();
-        }
-        m_recordList.replace(index.row(), record);
-        emit dataChanged(index, index);
+            if (nColumn == 1)
+            {
+                record.name = value.toString();
+            }
+            else if (nColumn == 2 || nColumn == 4)
+            {
+                record.size = value.toLongLong();
+            }
+            else if (nColumn == 3)
+            {
+                record.atime = value.toDateTime();
+            }
+            m_recordList.replace(index.row(), record);
+            emit dataChanged(index, index);
 
-        if ((nColumn == 2) || (nColumn == 4))
-        {
-            int nSizeColumn = (nColumn == 2) ? 4 : 2;
-            QModelIndex sizeIndex = this->index(index.row(), nSizeColumn);
-            emit dataChanged(sizeIndex, sizeIndex);
-        }
+            if ((nColumn == 2) || (nColumn == 4))
+            {
+                int nSizeColumn = (nColumn == 2) ? 4 : 2;
+                QModelIndex sizeIndex = this->index(index.row(), nSizeColumn);
+                emit dataChanged(sizeIndex, sizeIndex);
+            }
 
-        return true;
-    }
+            return true;
+        }
 #if defined(Q_OS_MAC)
     case Qt::CheckStateRole:
     {
@@ -116,27 +116,22 @@ bool DetailModel::setData(const QModelIndex &index, const QVariant &value, int r
         }
     }
 #elif defined(Q_OS_WIN32)
-    case Qt::CheckStateRole:
-    {
-        if (nColumn == 0){
-            check_state_map[index.row()] = (value == Qt::Checked ? Qt::Checked : Qt::Unchecked);
-            return true;
+        case Qt::CheckStateRole:
+        case Qt::UserRole:
+        {
+            if (nColumn == 0)
+            {
+                record.bChecked = value.toBool();
+                m_recordList.replace(index.row(), record);
+                emit dataChanged(index, index);
+
+                if (role == Qt::UserRole)
+                    onStateChanged();
+                return true;
+            }
         }
     }
-//    case Qt::UserRole:
-//    {
-//        if (nColumn == 0)
-//        {
-//            record.bChecked = value.toBool();
-
-//            m_recordList.replace(index.row(), record);
-//            emit dataChanged(index, index);
-//            return true;
-//        }
-//    }
-    default:
-        return false;
-    }
+#endif
     return false;
 }
 
@@ -147,7 +142,7 @@ QVariant DetailModel::data(const QModelIndex &index, int role) const
 
         int nRow = index.row();
         int nColumn = index.column();
-        FilesInfo record = m_recordList.at(nRow);
+        FileInfo record = m_recordList.at(nRow);
 
         switch (role)
         {
@@ -159,23 +154,22 @@ QVariant DetailModel::data(const QModelIndex &index, int role) const
         {
             if (nColumn == 1)
             {
-                return record.FileName;
+                return record.name;
             }
             else if (nColumn == 2)
             {
-                return tool->bytesToGBMBKB(record.Size);
+                return tool->bytesToGBMBKB(record.size);
             }
             else if (nColumn == 3)
             {
-                return record.ReviseTime;
+                return record.atime;
             }
             else if (nColumn == 4)
             {
-                return record.Size;
+                return record.size;
             }
             return "";
         }
-        case Qt::CheckStateRole:
 #if defined(Q_OS_MAC)
         case Qt::CheckStateRole:
         {
@@ -184,13 +178,10 @@ QVariant DetailModel::data(const QModelIndex &index, int role) const
         }
 #elif defined(Q_OS_WIN32)
         case Qt::UserRole:
-//        case Qt::UserRole:
-//        {
-//            if (nColumn == 0)
-//                return record.bChecked;
-//        }
-        default:
-            return QVariant();
+        {
+            if (nColumn == 0)
+                return record.bChecked;
+        }
 #endif
         }
         return QVariant();
@@ -212,7 +203,6 @@ Qt::ItemFlags DetailModel::flags(const QModelIndex &index) const
         return QAbstractItemModel::flags(index);
 
     Qt::ItemFlags flags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
-
     return flags;
 #endif
 }
@@ -222,7 +212,7 @@ void DetailModel::onStateChanged()
     Qt::CheckState state = Qt::Unchecked;
     int nCount = m_recordList.count();
     int nSelectedCount = 0;
-    FilesInfo record;
+    FileInfo record;
     for (int i = 0; i < nCount; ++i)
     {
         record = m_recordList.at(i);

@@ -8,6 +8,7 @@
 #include "src/model/sortfilterproxymodel.h"
 #include "src/model/usermodel.h"
 #include "src/util/configsetting.h"
+#include "src/model/filesmodel.h"
 
 namespace Ui {
 class MainWindow;
@@ -33,6 +34,10 @@ private slots:
     void on_loginOut_clicked();
 
 private:
+    void setWidgetList();
+    void setAllFilesList();
+    void setNetwork();
+
     Ui::MainWindow *ui;
     Content *content;
 	mitContent *MitContent;
@@ -40,7 +45,7 @@ private:
     SortFilterProxyModel *pProxyModel;
     ConfigSetting *setting;
 
-    QList<FilesInfo> FilesList;
+    QList<FileInfo> FilesList;
 };
 
 #endif // MAINWINDOW_H

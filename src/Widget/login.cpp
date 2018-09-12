@@ -15,7 +15,6 @@ Login::Login(QWidget *parent) :
     ui->setupUi(this);
 
     setting = new ConfigSetting;
-    setting->deleteSystemConfig("token");
 
     if(setting->getSystemConfig("Remember") == "2"){
         ui->Password->setText("12345678");

@@ -42,7 +42,8 @@ SOURCES += \
     src/util/request.cpp \
     src/util/configsetting.cpp \
     src/model/usermodel.cpp \
-    src/Widget/messagebox.cpp
+    src/Widget/messagebox.cpp \
+    src/model/filesmodel.cpp
 
 HEADERS += \
         src/Widget/mainwindow.h \
@@ -58,13 +59,13 @@ HEADERS += \
     src/model/detailmodel.h \
     src/Widget/filesheaderview.h \
     src/Delegate/checkboxdelegate.h \
-    src/util/toolclass.h \
     src/model/sortfilterproxymodel.h \
     src/util/tool.h \
     src/util/request.h \
     src/util/configsetting.h \
     src/model/usermodel.h \
-    src/Widget/messagebox.h
+    src/Widget/messagebox.h \
+    src/model/filesmodel.h
 
 FORMS += \
         src/Widget/mainwindow.ui \

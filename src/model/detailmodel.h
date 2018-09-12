@@ -6,13 +6,7 @@
 #include <QMap>
 
 #include "src/util/tool.h"
-
-typedef struct{
-    QString FileName;
-    qint64  Size;
-    QDateTime ReviseTime;
-    bool bChecked;
-}FilesInfo;
+#include "src/model/filesmodel.h"
 
 class DetailModel : public QAbstractItemModel
 {
@@ -36,11 +30,12 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     Qt::ItemFlags flags(const QModelIndex &index) const override;
 
-    void updateData(QList<FilesInfo> recordList);
+    void updateData(QList<FileInfo> recordList);
 
 private:
-    QList<FilesInfo> m_recordList;
+    QList<FileInfo> m_recordList;
     QMap<int, int> check_state_map;
+    Tool *tool;
 
 public slots:
     void onStateChanged();

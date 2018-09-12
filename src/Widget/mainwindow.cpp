@@ -25,9 +25,58 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    setNetwork();
+    setWidgetList();
+    setAllFilesList();
 
     setting = new ConfigSetting;
+}
 
+void MainWindow::setNetwork()
+{
+    QByteArray ba;
+    QNetworkReply::NetworkError ret= WebServiceHelp::getInstance()->sendPostRequest("/v1/files/page", setting->getSystemConfig("token"), QByteArray(), ba);
+    if(ret==QNetworkReply::NoError){
+        FilesModel *model = new FilesModel;
+        model->setFilesModel(ba);
+        Files files = model->getFilesModel();
+        FilesList = files.result.list;
+    }else{
+        qDebug() << QStringLiteral("%1 error:%2").arg("/v1/files/page").arg(ret);
+    }
+}
+
+void MainWindow::setAllFilesList()
+{
+    pModel = new DetailModel;
+    pProxyModel = new SortFilterProxyModel(this);
+    FilesHeaderView *pHeader = new FilesHeaderView(Qt::Horizontal, this);
+    CheckBoxDelegate *pDelegate = new CheckBoxDelegate(this);
+
+    content->Files->TableView->setHorizontalHeader(pHeader);
+    pProxyModel->setSourceModel(pModel);
+    content->Files->TableView->setModel(pProxyModel);
+    content->Files->TableView->setSortingEnabled(true);
+    content->Files->TableView->setHorizontalHeader(pHeader);
+    content->Files->TableView->setItemDelegate(pDelegate);
+    pHeader->setSectionResizeMode(QHeaderView::Stretch);
+    pHeader->setSectionResizeMode(0, QHeaderView::Fixed);
+    pHeader->setSectionResizeMode(2, QHeaderView::Fixed);
+    pHeader->setSectionResizeMode(3, QHeaderView::Fixed);
+
+    content->Files->TableView->setColumnWidth(0, 30);
+    content->Files->TableView->setColumnWidth(2, 250);
+    content->Files->TableView->setColumnWidth(3, 110);
+    content->Files->TableView->setColumnHidden(4, true);
+
+    connect(pModel, SIGNAL(stateChanged(int)), pHeader, SLOT(onStateChanged(int)));
+    connect(pHeader, SIGNAL(stateChanged(int)), pModel, SLOT(onStateChanged(int)));
+    connect(content->Files->TableView, SIGNAL(clicked(QModelIndex)), this, SLOT(onClicked(QModelIndex)));
+    pModel->updateData(FilesList);
+}
+
+void MainWindow::setWidgetList()
+{
     QPixmap allFiles(QString(":/assets/assets/image.png"));
     QPixmap MyImage(QString(":/assets/assets/image.png"));
     QPixmap MyVideo(QString(":/assets/assets/image.png"));
@@ -60,59 +109,15 @@ MainWindow::MainWindow(QWidget *parent) :
     spacingView->setStyleSheet("background:#E9E9E9");
     ui->MainLayout->addWidget(spacingView,0,1);
 
-	MitContent = new mitContent;
-	QObject::connect(ui->myMit, SIGNAL(currentRowChanged(int)), MitContent->stack, SLOT(setCurrentIndex(int)));
-	ui->MainLayout->addWidget(MitContent,0,2);
+    MitContent = new mitContent;
+    QObject::connect(ui->myMit, SIGNAL(currentRowChanged(int)), MitContent->stack, SLOT(setCurrentIndex(int)));
+    ui->MainLayout->addWidget(MitContent,0,2);
 
-    content = new Content;														
+    content = new Content;
     QObject::connect(ui->myFiles, SIGNAL(currentRowChanged(int)), content->stack, SLOT(setCurrentIndex(int)));
     ui->MainLayout->addWidget(content,0,2);
-	ui->MainLayout->setSpacing(0);
-	ui->MainLayout->setMargin(0);
-
-    pModel = new DetailModel;
-    pProxyModel = new SortFilterProxyModel(this);
-    FilesHeaderView *pHeader = new FilesHeaderView(Qt::Horizontal, this);
-    CheckBoxDelegate *pDelegate = new CheckBoxDelegate(this);
-
-    content->Files->TableView->setHorizontalHeader(pHeader);
-    pProxyModel->setSourceModel(pModel);
-    content->Files->TableView->setModel(pProxyModel);
-    content->Files->TableView->setSortingEnabled(true);
-    content->Files->TableView->setHorizontalHeader(pHeader);
-//    content->Files->TableView->setItemDelegate(pDelegate);
-    pHeader->setSectionResizeMode(QHeaderView::Stretch);
-    pHeader->setSectionResizeMode(0, QHeaderView::Fixed);
-	pHeader->setSectionResizeMode(2, QHeaderView::Fixed);
-	pHeader->setSectionResizeMode(3, QHeaderView::Fixed);
-
-    content->Files->TableView->setColumnWidth(0, 30);
-	content->Files->TableView->setColumnWidth(2, 250);
-	content->Files->TableView->setColumnWidth(3, 110);
-    content->Files->TableView->setColumnHidden(4, true);
-
-    connect(pModel, SIGNAL(stateChanged(int)), pHeader, SLOT(onStateChanged(int)));
-    connect(pHeader, SIGNAL(stateChanged(int)), pModel, SLOT(onStateChanged(int)));
-    connect(content->Files->TableView, SIGNAL(clicked(QModelIndex)), this, SLOT(onClicked(QModelIndex)));
-
-    for (int i = 0; i < 5; ++i)
-    {
-        int nIndex = qrand()%20 + 1;
-        int nHour = qrand()%24;
-        int nMinute = qrand()%60;
-        int nSecond = qrand()%60;
-        int nBytes = qrand()%100000;
-
-        QDateTime dateTime(QDate(2018, 9, 3), QTime(nHour, nMinute, nSecond));
-
-        FilesInfo record;
-        record.FileName = QString("Name %1.cpp").arg(nIndex);
-        record.Size = nBytes;
-        record.ReviseTime = dateTime;
-        record.bChecked = false;
-        FilesList.append(record);
-    }
-    pModel->updateData(FilesList);
+    ui->MainLayout->setSpacing(0);
+    ui->MainLayout->setMargin(0);
 }
 
 void MainWindow::setUserInfo(User user)
