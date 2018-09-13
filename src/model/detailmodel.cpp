@@ -157,7 +157,6 @@ QVariant DetailModel::data(const QModelIndex &index, int role) const
              }
              return "";
          }
-         case Qt::CheckStateRole:
          case Qt::UserRole:
          {
              if (nColumn == 0)
