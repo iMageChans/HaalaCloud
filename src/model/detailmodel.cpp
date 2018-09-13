@@ -1,5 +1,6 @@
-﻿#include "detailmodel.h"
+﻿#include "src/model/detailmodel.h"
 #include <QColor>
+#include <QVariant>
 
 DetailModel::DetailModel(QObject *parent)
     : QAbstractItemModel(parent)
@@ -103,19 +104,6 @@ bool DetailModel::setData(const QModelIndex &index, const QVariant &value, int r
 
             return true;
         }
-#if defined(Q_OS_MAC)
-    case Qt::CheckStateRole:
-    {
-        if (nColumn == 0)
-        {
-            record.bChecked = (value.toInt() == Qt::Checked);
-
-            m_recordList.replace(index.row(), record);
-            emit dataChanged(index, index);
-            return true;
-        }
-    }
-#elif defined(Q_OS_WIN32)
         case Qt::CheckStateRole:
         case Qt::UserRole:
         {
@@ -130,81 +118,63 @@ bool DetailModel::setData(const QModelIndex &index, const QVariant &value, int r
                 return true;
             }
         }
-    }
-#endif
     return false;
+    }
 }
 
 QVariant DetailModel::data(const QModelIndex &index, int role) const
-{
-    if (!index.isValid())
-            return QVariant();
+ {
+     if (!index.isValid())
+             return QVariant();
 
-        int nRow = index.row();
-        int nColumn = index.column();
-        FileInfo record = m_recordList.at(nRow);
+         int nRow = index.row();
+         int nColumn = index.column();
+         FileInfo record = m_recordList.at(nRow);
 
-        switch (role)
-        {
-        case Qt::TextColorRole:
-            return QColor(Qt::white);
-        case Qt::TextAlignmentRole:
-            return QVariant(Qt::AlignLeft | Qt::AlignVCenter);
-        case Qt::DisplayRole:
-        {
-            if (nColumn == 1)
-            {
-                return record.name;
-            }
-            else if (nColumn == 2)
-            {
-                return tool->bytesToGBMBKB(record.size);
-            }
-            else if (nColumn == 3)
-            {
-                return record.atime;
-            }
-            else if (nColumn == 4)
-            {
-                return record.size;
-            }
-            return "";
-        }
-#if defined(Q_OS_MAC)
-        case Qt::CheckStateRole:
-        {
-            if (nColumn == 0)
-                return record.bChecked ? Qt::Checked : Qt::Unchecked;
-        }
-#elif defined(Q_OS_WIN32)
-        case Qt::UserRole:
-        {
-            if (nColumn == 0)
-                return record.bChecked;
-        }
-#endif
-        }
-        return QVariant();
-}
+         switch (role)
+         {
+         case Qt::TextColorRole:
+             return QColor(Qt::white);
+         case Qt::TextAlignmentRole:
+             return QVariant(Qt::AlignLeft | Qt::AlignVCenter);
+         case Qt::DisplayRole:
+         {
+             if (nColumn == 1)
+             {
+                 return record.name;
+             }
+             else if (nColumn == 2)
+             {
+                 return tool->bytesToGBMBKB(record.size);
+             }
+             else if (nColumn == 3)
+             {
+                 return record.atime;
+             }
+             else if (nColumn == 4)
+             {
+                 return record.size;
+             }
+             return "";
+         }
+         case Qt::CheckStateRole:
+         case Qt::UserRole:
+         {
+             if (nColumn == 0)
+                 return record.bChecked;
+         }
+         }
+         return QVariant();
+ }
+
 
 Qt::ItemFlags DetailModel::flags(const QModelIndex &index) const
 {
-#if defined(Q_OS_MAC)
-    if (!index.isValid())
-        return QAbstractItemModel::flags(index);
-
-    Qt::ItemFlags flags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
-    if (index.column() == 0)
-        flags |= Qt::ItemIsUserCheckable;
-
-    return flags;
-#elif defined(Q_OS_WIN32)
     if (!index.isValid())
         return QAbstractItemModel::flags(index);
 
     Qt::ItemFlags flags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
     return flags;
-#endif
 }
 
 void DetailModel::onStateChanged()

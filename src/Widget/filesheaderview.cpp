@@ -58,7 +58,11 @@ void FilesHeaderView::paintSection(QPainter *painter, const QRect &rect, int log
 
         QCheckBox checkBox;
         option.iconSize = QSize(12, 12);
+#if defined(Q_OS_MAC)
+        option.rect = QRect(5, 6, 12, 12);
+#elif defined(Q_OS_WIN32)
         option.rect = QRect(8, 6, 12, 12);
+#endif
         style()->drawPrimitive(QStyle::PE_IndicatorCheckBox, &option, painter, &checkBox);
     }
 }

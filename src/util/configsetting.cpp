@@ -1,6 +1,7 @@
 ﻿#include "configsetting.h"
 
 #include <QSettings>
+#include <QDir>
 
 ConfigSetting::ConfigSetting()
 {
