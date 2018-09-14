@@ -30,3 +30,8 @@ ProgressList::~ProgressList()
 {
     delete ui;
 }
+
+void ProgressList::on_pushButton_clicked()
+{
+
+}

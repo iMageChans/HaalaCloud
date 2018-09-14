@@ -44,6 +44,8 @@ void ProgressBarDelegate::paint(QPainter *painter, const QStyleOptionViewItem &o
         progressBarOption.textVisible = true;
 
         QProgressBar progressBar;
+        progressBar.setStyleSheet("QProgressBar{border:none;background:#E9E9E9;border-radius:5px;}"
+                                  "QProgressBar::chunk {background-color:#2EC17C;border-radius:5px;}");
 
         //绘制进度条
         QApplication::style()->drawControl(QStyle::CE_ProgressBar, &progressBarOption, painter, &progressBar);

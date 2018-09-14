@@ -3,6 +3,8 @@
 #include "src/Widget/filesheaderview.h"
 #include "src/Delegate/checkboxdelegate.h"
 #include "src/Delegate/tableviewdelegate.h"
+#include "src/Delegate/progressbardelegate.h"
+#include "src/util/filedownloadthread.h"
 #include "src/util/tool.h"
 #include "src/util/request.h"
 #include "src/Widget/login.h"
@@ -29,7 +31,13 @@ MainWindow::MainWindow(QWidget *parent) :
     setNetwork();
     setWidgetList();
     setAllFilesList();
+    setUploadList();
 
+
+    FileDownloadThread *FDT = new FileDownloadThread;
+    connect(FDT, SIGNAL(transfer(QList<FilesStatusInfo>)), this, SLOT(updateUploadList(QList<FilesStatusInfo>)));
+    connect(FDT, SIGNAL(finished()), FDT, SLOT(deleteLater()));
+    FDT->start();
     setting = new ConfigSetting;
 }
 
@@ -47,14 +55,76 @@ void MainWindow::setNetwork()
     }
 }
 
+void MainWindow::setUploadList()
+{
+    uploadModel = new ProgressModel;
+    FilesHeaderView *pHeader = new FilesHeaderView(Qt::Horizontal, this);
+
+    sendView->Upload->TableView->setHorizontalHeader(pHeader);
+    sendView->Upload->TableView->setModel(uploadModel);
+    sendView->Upload->TableView->setSortingEnabled(true);
+
+    pHeader->setSectionResizeMode(QHeaderView::Stretch);
+
+#if defined(Q_OS_MAC)
+    pHeader->setSectionResizeMode(0, QHeaderView::Fixed);
+    pHeader->setSectionResizeMode(2, QHeaderView::Fixed);
+    pHeader->setSectionResizeMode(3, QHeaderView::Fixed);
+
+    content->Files->TableView->setColumnWidth(0, 30);
+    content->Files->TableView->setColumnWidth(2, 150);
+    content->Files->TableView->setColumnWidth(3, 150);
+    content->Files->TableView->setColumnHidden(4, true);
+#elif defined(Q_OS_WIN32)
+    CheckBoxDelegate *pDelegate = new CheckBoxDelegate(this);
+    sendView->Upload->TableView->setItemDelegate(pDelegate);
+
+    TableViewDelegate *tableViewDelegate = new TableViewDelegate(this);
+    sendView->Upload->TableView->setItemDelegate(tableViewDelegate);
+    tableViewDelegate->setColumn(4);
+
+    ProgressBarDelegate *progressDelegate = new ProgressBarDelegate(this);
+    sendView->Upload->TableView->setItemDelegate(progressDelegate);
+
+    pHeader->setSectionResizeMode(0, QHeaderView::Fixed);
+    pHeader->setSectionResizeMode(2, QHeaderView::Fixed);
+    pHeader->setSectionResizeMode(3, QHeaderView::Fixed);
+    pHeader->setSectionResizeMode(4, QHeaderView::Fixed);
+
+    sendView->Upload->TableView->setColumnWidth(0, 30);
+    sendView->Upload->TableView->setColumnWidth(2, 150);
+    sendView->Upload->TableView->setColumnWidth(3, 200);
+    sendView->Upload->TableView->setColumnWidth(4, 150);
+#endif
+    connect(uploadModel, SIGNAL(stateChanged(int)), pHeader, SLOT(onStateChanged(int)));
+    connect(pHeader, SIGNAL(stateChanged(int)), uploadModel, SLOT(onStateChanged(int)));
+    connect(sendView->Upload->TableView, SIGNAL(clicked(QModelIndex)), this, SLOT(onClicked(QModelIndex)));
+
+    for (int i = 0; i < 5; ++i)
+    {
+        FilesStatusInfo record;
+        record.FileName = QString("/root/user/file%1.log").arg(i + 1);
+        record.Size = 1024 / ((i + 2) *(i + 2)) ;
+        record.nStatus = i;
+        record.nProgress = qrand() % 100 + 1;
+
+        uploadInfoList.append(record);
+    }
+    uploadModel->updateData(uploadInfoList);
+}
+
+void MainWindow::updateUploadList(QList<FilesStatusInfo> filesStatusInfo){
+//    qDebug() << filesStatusInfo[0].nProgress;
+//    uploadModel->updateData(filesStatusInfo);
+}
+
 void MainWindow::setAllFilesList()
 {
-    pModel = new DetailModel;
+    detaiModel = new DetailModel;
     pProxyModel = new SortFilterProxyModel(this);
     FilesHeaderView *pHeader = new FilesHeaderView(Qt::Horizontal, this);
 
-    content->Files->TableView->setHorizontalHeader(pHeader);
-    pProxyModel->setSourceModel(pModel);
+    pProxyModel->setSourceModel(detaiModel);
     content->Files->TableView->setModel(pProxyModel);
     content->Files->TableView->setSortingEnabled(true);
     content->Files->TableView->setHorizontalHeader(pHeader);
@@ -76,6 +146,7 @@ void MainWindow::setAllFilesList()
 
     TableViewDelegate *tableViewDelegate = new TableViewDelegate(this);
     content->Files->TableView->setItemDelegate(tableViewDelegate);
+    tableViewDelegate->setColumn(2);
 
     pHeader->setSectionResizeMode(0, QHeaderView::Fixed);
     pHeader->setSectionResizeMode(2, QHeaderView::Fixed);
@@ -88,10 +159,10 @@ void MainWindow::setAllFilesList()
     content->Files->TableView->setColumnWidth(4, 110);
     content->Files->TableView->setColumnHidden(5, true);
 #endif
-    connect(pModel, SIGNAL(stateChanged(int)), pHeader, SLOT(onStateChanged(int)));
-    connect(pHeader, SIGNAL(stateChanged(int)), pModel, SLOT(onStateChanged(int)));
+    connect(detaiModel, SIGNAL(stateChanged(int)), pHeader, SLOT(onStateChanged(int)));
+    connect(pHeader, SIGNAL(stateChanged(int)), detaiModel, SLOT(onStateChanged(int)));
     connect(content->Files->TableView, SIGNAL(clicked(QModelIndex)), this, SLOT(onClicked(QModelIndex)));
-    pModel->updateData(FilesList);
+    detaiModel->updateData(FilesList);
 }
 
 void MainWindow::setWidgetList()
@@ -128,9 +199,9 @@ void MainWindow::setWidgetList()
     spacingView->setStyleSheet("background:#E9E9E9");
     ui->MainLayout->addWidget(spacingView,0,1);
 
-    MitContent = new mitContent;
-    QObject::connect(ui->myMit, SIGNAL(currentRowChanged(int)), MitContent->stack, SLOT(setCurrentIndex(int)));
-    ui->MainLayout->addWidget(MitContent,0,2);
+    sendView = new mitContent;
+    QObject::connect(ui->myMit, SIGNAL(currentRowChanged(int)), sendView->stack, SLOT(setCurrentIndex(int)));
+    ui->MainLayout->addWidget(sendView,0,2);
 
     content = new Content;
     QObject::connect(ui->myFiles, SIGNAL(currentRowChanged(int)), content->stack, SLOT(setCurrentIndex(int)));
@@ -166,9 +237,9 @@ void MainWindow::onClicked(const QModelIndex &index)
     if (index.isValid())
     {
         QModelIndex sourceIndex = pProxyModel->mapToSource(index);
-        QModelIndex checkIndex = pModel->index(sourceIndex.row(), 0);
-        bool bChecked = pModel->data(checkIndex, Qt::UserRole).toBool();
-        pModel->setData(checkIndex, !bChecked, Qt::UserRole);
+        QModelIndex checkIndex = detaiModel->index(sourceIndex.row(), 0);
+        bool bChecked = detaiModel->data(checkIndex, Qt::UserRole).toBool();
+        detaiModel->setData(checkIndex, !bChecked, Qt::UserRole);
     }
 }
 
@@ -179,7 +250,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_myFiles_itemSelectionChanged()
 {
-    MitContent->hide();
+    sendView->hide();
     content->show();
 
     for (int i = 0; i < 4; i++)
@@ -192,7 +263,7 @@ void MainWindow::on_myFiles_itemSelectionChanged()
 void MainWindow::on_myMit_itemSelectionChanged()
 {
     content->hide();
-    MitContent->show();
+    sendView->show();
 
 	for (int i = 0; i < 3; i++)
 	{

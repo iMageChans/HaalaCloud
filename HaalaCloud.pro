@@ -45,7 +45,8 @@ SOURCES += \
     src/Widget/messagebox.cpp \
     src/model/filesmodel.cpp \
     src/model/download.cpp \
-    src/Delegate/tableviewdelegate.cpp
+    src/Delegate/tableviewdelegate.cpp \
+    src/util/filedownloadthread.cpp
 
 HEADERS += \
         src/Widget/mainwindow.h \
@@ -69,7 +70,8 @@ HEADERS += \
     src/Widget/messagebox.h \
     src/model/filesmodel.h \
     src/model/download.h \
-    src/Delegate/tableviewdelegate.h
+    src/Delegate/tableviewdelegate.h \
+    src/util/filedownloadthread.h
 
 FORMS += \
         src/Widget/mainwindow.ui \

@@ -11,6 +11,9 @@ public:
     explicit TableViewDelegate(QWidget *parent = nullptr);
     void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
     bool editorEvent(QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem& option, const QModelIndex& index);
+    void setColumn(int number);
+
+    int Column;
 
 signals:
     void open(const QModelIndex &index);

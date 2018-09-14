@@ -34,7 +34,7 @@ void TableViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opt
 
     QStyledItemDelegate::paint(painter, viewOption, index);
 
-    if (index.column() == 2)
+    if (index.column() == Column)
     {
         // 计算按钮显示区域
         int nCount = m_list.count();
@@ -74,7 +74,7 @@ void TableViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opt
 // 响应按钮事件 - 划过、按下
 bool TableViewDelegate::editorEvent(QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem& option, const QModelIndex& index)
 {
-    if (index.column() != 2)
+    if (index.column() != Column)
         return false;
 
     m_nType = -1;
@@ -137,4 +137,9 @@ bool TableViewDelegate::editorEvent(QEvent* event, QAbstractItemModel* model, co
     }
 
     return bRepaint;
+}
+
+void TableViewDelegate::setColumn(int number)
+{
+    Column = number;
 }

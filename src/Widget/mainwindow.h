@@ -3,8 +3,9 @@
 
 #include <QMainWindow>
 #include "src/Widget/content.h"
-#include "mitcontent.h"
+#include "src/Widget/mitcontent.h"
 #include "src/model/detailmodel.h"
+#include "src/model/progressmodel.h"
 #include "src/model/sortfilterproxymodel.h"
 #include "src/model/usermodel.h"
 #include "src/util/configsetting.h"
@@ -33,19 +34,24 @@ private slots:
 
     void on_loginOut_clicked();
 
+    void updateUploadList(QList<FilesStatusInfo> filesStatusInfo);
+
 private:
     void setWidgetList();
     void setAllFilesList();
+    void setUploadList();
     void setNetwork();
 
     Ui::MainWindow *ui;
     Content *content;
-	mitContent *MitContent;
-    DetailModel *pModel;
+    mitContent *sendView;
+    DetailModel *detaiModel;
+    ProgressModel *uploadModel;
     SortFilterProxyModel *pProxyModel;
     ConfigSetting *setting;
 
     QList<FileInfo> FilesList;
+    QList<FilesStatusInfo> uploadInfoList;
 };
 
 #endif // MAINWINDOW_H

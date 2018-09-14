@@ -29,16 +29,13 @@ QVariant ProgressModel::headerData(int section, Qt::Orientation orientation, int
                 return QStringLiteral("文件名");
 
             if (section == 2)
-                return QStringLiteral("");
-
-            if (section == 3)
                 return QStringLiteral("大小");
 
-            if (section == 4)
-                return QStringLiteral("修改日期");
+            if (section == 3)
+                return QStringLiteral("状态");
 
-            if (section == 5)
-                return QStringLiteral("大小（字节）");
+            if (section == 4)
+                return QStringLiteral("操作");
         }
     }
     }
@@ -68,8 +65,8 @@ int ProgressModel::rowCount(const QModelIndex &parent) const
 int ProgressModel::columnCount(const QModelIndex &parent) const
 {
     if (!parent.isValid())
-        return 6;
-    return 6;
+        return 5;
+    return 5;
 }
 
 bool ProgressModel::setData(const QModelIndex &index, const QVariant &value, int role)
@@ -87,23 +84,12 @@ bool ProgressModel::setData(const QModelIndex &index, const QVariant &value, int
             {
                 record.FileName = value.toString();
             }
-            else if (nColumn == 3 || nColumn == 5)
+            else if (nColumn == 2)
             {
                 record.Size = value.toLongLong();
             }
-            else if (nColumn == 4)
-            {
-                record.nProgress = value.toLongLong();
-            }
             m_recordList.replace(index.row(), record);
             emit dataChanged(index, index);
-
-            if ((nColumn == 3) || (nColumn == 5))
-            {
-                int nSizeColumn = (nColumn == 3) ? 5 : 3;
-                QModelIndex sizeIndex = this->index(index.row(), nSizeColumn);
-                emit dataChanged(sizeIndex, sizeIndex);
-            }
 
             return true;
         }
@@ -119,6 +105,11 @@ bool ProgressModel::setData(const QModelIndex &index, const QVariant &value, int
                 if (role == Qt::UserRole)
                     onStateChanged();
                 return true;
+            }
+            if (nColumn == 3)
+            {
+                record.nProgress = value.toInt();
+                m_recordList.replace(index.row(), record);
             }
         }
     return false;
@@ -146,17 +137,9 @@ QVariant ProgressModel::data(const QModelIndex &index, int role) const
              {
                  return record.FileName;
              }
-             else if (nColumn == 3)
+             else if (nColumn == 2)
              {
                  return tool->bytesToGBMBKB(record.Size);
-             }
-             else if (nColumn == 4)
-             {
-                 return record.nProgress;
-             }
-             else if (nColumn == 5)
-             {
-                 return record.Size;
              }
              return "";
          }
@@ -167,6 +150,9 @@ QVariant ProgressModel::data(const QModelIndex &index, int role) const
          {
              if (nColumn == 0)
                  return record.bChecked;
+
+             if (nColumn == 3)
+                 return record.nProgress;
          }
          }
          return QVariant();
