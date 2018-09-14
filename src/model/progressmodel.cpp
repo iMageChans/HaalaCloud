@@ -17,27 +17,32 @@ void ProgressModel::updateData(QList<FilesStatusInfo> recordList)
 
 QVariant ProgressModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    switch (role){
-        case Qt::TextAlignmentRole:
-            return QVariant(Qt::AlignLeft | Qt::AlignVCenter);
-        case Qt::DisplayRole:
+    switch (role)
+    {
+    case Qt::TextAlignmentRole:
+        return QVariant(Qt::AlignLeft | Qt::AlignVCenter);
+    case Qt::DisplayRole:
+    {
+        if (orientation == Qt::Horizontal)
         {
-            if (orientation == Qt::Horizontal)
-            {
-                if (section == 1)
-                    return QStringLiteral("文件名");
+            if (section == 1)
+                return QStringLiteral("文件名");
 
-                if (section == 1)
-                    return QStringLiteral("大小");
+            if (section == 2)
+                return QStringLiteral("");
 
-                if (section == 1)
-                    return QStringLiteral("状态");
+            if (section == 3)
+                return QStringLiteral("大小");
 
-                if (section == 1)
-                    return QStringLiteral("操作");
-            }
+            if (section == 4)
+                return QStringLiteral("修改日期");
+
+            if (section == 5)
+                return QStringLiteral("大小（字节）");
         }
     }
+    }
+
     return QVariant();
 }
 
@@ -50,7 +55,7 @@ QModelIndex ProgressModel::index(int row, int column, const QModelIndex &parent)
 
 QModelIndex ProgressModel::parent(const QModelIndex &index) const
 {
-	return QModelIndex();
+    return QModelIndex();
 }
 
 int ProgressModel::rowCount(const QModelIndex &parent) const
@@ -63,60 +68,8 @@ int ProgressModel::rowCount(const QModelIndex &parent) const
 int ProgressModel::columnCount(const QModelIndex &parent) const
 {
     if (!parent.isValid())
-        return 4;
-    return 4;
-}
-
-QVariant ProgressModel::data(const QModelIndex &index, int role) const
-{
-    if (!index.isValid())
-            return QVariant();
-
-        int nRow = index.row();
-        int nColumn = index.column();
-        FilesStatusInfo record = m_recordList.at(nRow);
-
-        switch (role)
-        {
-        case Qt::TextColorRole:
-            return QColor(Qt::white);
-        case Qt::TextAlignmentRole:
-            return QVariant(Qt::AlignLeft | Qt::AlignVCenter);
-        case Qt::DisplayRole:
-        {
-            if (nColumn == 1)
-            {
-                return record.FileName;
-            }
-            else if (nColumn == 2)
-            {
-                return tool->bytesToGBMBKB(record.Size);
-            }
-            else if (nColumn == 3)
-            {
-                return record.nProgress;
-            }
-            else if (nColumn == 4)
-            {
-                return record.nStatus;
-            }
-            return "";
-        }
-#if defined(Q_OS_MAC)
-        case Qt::CheckStateRole:
-        {
-            if (nColumn == 0)
-                return record.bChecked ? Qt::Checked : Qt::Unchecked;
-        }
-#elif defined(Q_OS_WIN32)
-        case Qt::UserRole:
-        {
-            if (nColumn == 0)
-                return record.bChecked;
-        }
-#endif
-        }
-        return QVariant();
+        return 6;
+    return 6;
 }
 
 bool ProgressModel::setData(const QModelIndex &index, const QVariant &value, int role)
@@ -128,84 +81,105 @@ bool ProgressModel::setData(const QModelIndex &index, const QVariant &value, int
     FilesStatusInfo record = m_recordList.at(index.row());
     switch (role)
     {
-    case Qt::DisplayRole:
-    {
-        if (nColumn == 1)
+        case Qt::DisplayRole:
         {
-            record.FileName = value.toString();
-        }
-        else if (nColumn == 2 || nColumn == 4)
-        {
-            record.Size = value.toLongLong();
-        }
-        else if (nColumn == 3)
-        {
-            record.nStatus = value.toInt();
-        }
-        m_recordList.replace(index.row(), record);
-        emit dataChanged(index, index);
-
-        if ((nColumn == 2) || (nColumn == 4))
-        {
-            int nSizeColumn = (nColumn == 2) ? 4 : 2;
-            QModelIndex sizeIndex = this->index(index.row(), nSizeColumn);
-            emit dataChanged(sizeIndex, sizeIndex);
-        }
-
-        return true;
-    }
-#if defined(Q_OS_MAC)
-    case Qt::CheckStateRole:
-    {
-        if (nColumn == 0)
-        {
-            record.bChecked = (value.toInt() == Qt::Checked);
-
-            m_recordList.replace(index.row(), record);
-            emit dataChanged(index, index);
-            return true;
-        }
-    }
-#elif defined(Q_OS_WIN32)
-    case Qt::CheckStateRole:
-    case Qt::UserRole:
-    {
-        if (nColumn == 0)
-        {
-            record.bChecked = value.toBool();
-
+            if (nColumn == 1)
+            {
+                record.FileName = value.toString();
+            }
+            else if (nColumn == 3 || nColumn == 5)
+            {
+                record.Size = value.toLongLong();
+            }
+            else if (nColumn == 4)
+            {
+                record.nProgress = value.toLongLong();
+            }
             m_recordList.replace(index.row(), record);
             emit dataChanged(index, index);
 
-            if (role == Qt::UserRole)
-                onStateChanged();
+            if ((nColumn == 3) || (nColumn == 5))
+            {
+                int nSizeColumn = (nColumn == 3) ? 5 : 3;
+                QModelIndex sizeIndex = this->index(index.row(), nSizeColumn);
+                emit dataChanged(sizeIndex, sizeIndex);
+            }
+
             return true;
         }
-    }
-#endif
-    }
+        case Qt::CheckStateRole:
+        case Qt::UserRole:
+        {
+            if (nColumn == 0)
+            {
+                record.bChecked = value.toBool();
+                m_recordList.replace(index.row(), record);
+                emit dataChanged(index, index);
+
+                if (role == Qt::UserRole)
+                    onStateChanged();
+                return true;
+            }
+        }
     return false;
+    }
 }
+
+QVariant ProgressModel::data(const QModelIndex &index, int role) const
+ {
+     if (!index.isValid())
+             return QVariant();
+
+         int nRow = index.row();
+         int nColumn = index.column();
+         FilesStatusInfo record = m_recordList.at(nRow);
+
+         switch (role)
+         {
+         case Qt::TextColorRole:
+             return QColor(Qt::white);
+         case Qt::TextAlignmentRole:
+             return QVariant(Qt::AlignLeft | Qt::AlignVCenter);
+         case Qt::DisplayRole:
+         {
+             if (nColumn == 1)
+             {
+                 return record.FileName;
+             }
+             else if (nColumn == 3)
+             {
+                 return tool->bytesToGBMBKB(record.Size);
+             }
+             else if (nColumn == 4)
+             {
+                 return record.nProgress;
+             }
+             else if (nColumn == 5)
+             {
+                 return record.Size;
+             }
+             return "";
+         }
+#if defined(Q_OS_MAC)
+         case Qt::CheckStateRole:
+#endif
+         case Qt::UserRole:
+         {
+             if (nColumn == 0)
+                 return record.bChecked;
+         }
+         }
+         return QVariant();
+ }
+
 
 Qt::ItemFlags ProgressModel::flags(const QModelIndex &index) const
 {
-#if defined(Q_OS_MAC)
     if (!index.isValid())
         return QAbstractItemModel::flags(index);
 
     Qt::ItemFlags flags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
-    if (index.column() == 0)
-        flags |= Qt::ItemIsUserCheckable;
-
     return flags;
-#elif defined(Q_OS_WIN32)
-    if (!index.isValid())
-        return QAbstractItemModel::flags(index);
-
-    Qt::ItemFlags flags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
-
-    return flags;
-#endif
 }
 
 void ProgressModel::onStateChanged()
