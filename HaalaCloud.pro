@@ -43,7 +43,8 @@ SOURCES += \
     src/util/configsetting.cpp \
     src/model/usermodel.cpp \
     src/Widget/messagebox.cpp \
-    src/model/filesmodel.cpp
+    src/model/filesmodel.cpp \
+    src/model/download.cpp
 
 HEADERS += \
         src/Widget/mainwindow.h \
@@ -65,7 +66,8 @@ HEADERS += \
     src/util/configsetting.h \
     src/model/usermodel.h \
     src/Widget/messagebox.h \
-    src/model/filesmodel.h
+    src/model/filesmodel.h \
+    src/model/download.h
 
 FORMS += \
         src/Widget/mainwindow.ui \
