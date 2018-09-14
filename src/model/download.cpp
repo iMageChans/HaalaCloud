@@ -1,7 +1,6 @@
 ﻿#include "download.h"
 
 #include <QFileInfo>
-#include <NetworkError>
 
 #define DOWNLOAD_FILE_SUFFIX    "_tmp"
 

@@ -12,20 +12,20 @@ public:
     explicit DownloadManager(QObject *parent = nullptr);
 
 signals:
-
-public slots:
     void signalDownloadProcess(qint64 Received, qint64 Total);
     void signalReplyFinished(int Code);
     void signalDownloadError();
+
+public slots:
+    void onDownloadProgress(qint64 bytesReceived, qint64 bytesTotal);
+    void onReadyRead();
+    void onFinished();
+    void onError(QNetworkReply::NetworkError code);
 
 private:
     void setDownInto(bool isSupportBreakPoint);
     QString getDownloadUrl();
     void downloadFile(QString url , QString fileName);
-    void onDownloadProgress(qint64 bytesReceived, qint64 bytesTotal);
-    void onReadyRead();
-    void onFinished();
-    void onError(QNetworkReply::NetworkError code);
     void stopWork();
     void stopDownload();
     void reset();

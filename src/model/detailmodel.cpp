@@ -29,12 +29,15 @@ QVariant DetailModel::headerData(int section, Qt::Orientation orientation, int r
                 return QStringLiteral("文件名");
 
             if (section == 2)
-                return QStringLiteral("大小");
+                return QStringLiteral("");
 
             if (section == 3)
-                return QStringLiteral("修改日期");
+                return QStringLiteral("大小");
 
             if (section == 4)
+                return QStringLiteral("修改日期");
+
+            if (section == 5)
                 return QStringLiteral("大小（字节）");
         }
     }
@@ -65,8 +68,8 @@ int DetailModel::rowCount(const QModelIndex &parent) const
 int DetailModel::columnCount(const QModelIndex &parent) const
 {
     if (!parent.isValid())
-        return 5;
-    return 5;
+        return 6;
+    return 6;
 }
 
 bool DetailModel::setData(const QModelIndex &index, const QVariant &value, int role)
@@ -84,20 +87,20 @@ bool DetailModel::setData(const QModelIndex &index, const QVariant &value, int r
             {
                 record.name = value.toString();
             }
-            else if (nColumn == 2 || nColumn == 4)
+            else if (nColumn == 3 || nColumn == 5)
             {
                 record.size = value.toLongLong();
             }
-            else if (nColumn == 3)
+            else if (nColumn == 4)
             {
                 record.atime = value.toDateTime();
             }
             m_recordList.replace(index.row(), record);
             emit dataChanged(index, index);
 
-            if ((nColumn == 2) || (nColumn == 4))
+            if ((nColumn == 3) || (nColumn == 5))
             {
-                int nSizeColumn = (nColumn == 2) ? 4 : 2;
+                int nSizeColumn = (nColumn == 3) ? 5 : 3;
                 QModelIndex sizeIndex = this->index(index.row(), nSizeColumn);
                 emit dataChanged(sizeIndex, sizeIndex);
             }
@@ -143,15 +146,15 @@ QVariant DetailModel::data(const QModelIndex &index, int role) const
              {
                  return record.name;
              }
-             else if (nColumn == 2)
+             else if (nColumn == 3)
              {
                  return tool->bytesToGBMBKB(record.size);
              }
-             else if (nColumn == 3)
+             else if (nColumn == 4)
              {
                  return record.atime;
              }
-             else if (nColumn == 4)
+             else if (nColumn == 5)
              {
                  return record.size;
              }

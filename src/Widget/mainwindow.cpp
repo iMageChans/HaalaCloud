@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "src/Widget/filesheaderview.h"
 #include "src/Delegate/checkboxdelegate.h"
+#include "src/Delegate/tableviewdelegate.h"
 #include "src/util/tool.h"
 #include "src/util/request.h"
 #include "src/Widget/login.h"
@@ -73,14 +74,19 @@ void MainWindow::setAllFilesList()
     CheckBoxDelegate *pDelegate = new CheckBoxDelegate(this);
     content->Files->TableView->setItemDelegate(pDelegate);
 
+    TableViewDelegate *tableViewDelegate = new TableViewDelegate(this);
+    content->Files->TableView->setItemDelegate(tableViewDelegate);
+
     pHeader->setSectionResizeMode(0, QHeaderView::Fixed);
     pHeader->setSectionResizeMode(2, QHeaderView::Fixed);
     pHeader->setSectionResizeMode(3, QHeaderView::Fixed);
+    pHeader->setSectionResizeMode(4, QHeaderView::Fixed);
 
     content->Files->TableView->setColumnWidth(0, 30);
-    content->Files->TableView->setColumnWidth(2, 250);
-    content->Files->TableView->setColumnWidth(3, 110);
-    content->Files->TableView->setColumnHidden(4, true);
+    content->Files->TableView->setColumnWidth(2, 80);
+    content->Files->TableView->setColumnWidth(3, 150);
+    content->Files->TableView->setColumnWidth(4, 110);
+    content->Files->TableView->setColumnHidden(5, true);
 #endif
     connect(pModel, SIGNAL(stateChanged(int)), pHeader, SLOT(onStateChanged(int)));
     connect(pHeader, SIGNAL(stateChanged(int)), pModel, SLOT(onStateChanged(int)));
