@@ -37,7 +37,18 @@ void Upload::setUploadConfig(QString filesPath)
         QNetworkReply::NetworkError ret= WebServiceHelp::getInstance()->sendPostRequest("/v1/store/token", setting->getSystemConfig("token"), postBa, ba);
         if(ret==QNetworkReply::NoError)
         {
-            qDebug() << ba;
+            upload_result uploadInfo = getUploadInfo(ba);
+            qDebug() << uploadInfo.code;
+            qDebug() << uploadInfo.result.name;
+            qDebug() << uploadInfo.result.parent;
+            qDebug() << uploadInfo.result.path;
+            qDebug() << uploadInfo.result.token;
+            qDebug() << uploadInfo.result.type;
+            qDebug() << uploadInfo.result.uploadUrl;
+            qDebug() << uploadInfo.result.version;
+            qDebug() << uploadInfo.status;
+            qDebug() << uploadInfo.success;
+            qDebug() << uploadInfo.token;
         }
         else
         {
@@ -120,5 +131,6 @@ upload_result Upload::getUploadInfo(QByteArray ba)
                     uploadInfo.token = token.toString();
             }
         }
+        return uploadInfo;
     }
 }

@@ -3,28 +3,6 @@
 #include <QJsonObject>
 #include <QDebug>
 
-//{
-//    "status": 200,
-//    "result": {
-//        "uuid": 5,
-//        "name": "eric2",
-//        "email": "",
-//        "countryCode": "86",
-//        "phone": "13627140483",
-//        "createTime": 1532526039883,
-//        "createIp": "::ffff:123.59.101.208",
-//        "ssid": {},
-//        "icon": "default.jpg",
-//        "spaceUsed": 0,
-//        "spaceCapacity": 8192,
-//        "type": 0,
-//        "status": 0
-//    },
-//    "code": "OK",
-//    "success": true,
-//    "token": "..."
-//}
-
 UserModel::UserModel(QObject *parent) : QObject(parent)
 {
 
