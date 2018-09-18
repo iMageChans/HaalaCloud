@@ -37,7 +37,7 @@ void Upload::setUploadConfig(QString filesPath)
         QNetworkReply::NetworkError ret= WebServiceHelp::getInstance()->sendPostRequest("/v1/store/token", setting->getSystemConfig("token"), postBa, ba);
         if(ret==QNetworkReply::NoError)
         {
-            upload_result uploadInfo = getUploadInfo(ba);
+            getUploadInfo(ba);
             qDebug() << uploadInfo.code;
             qDebug() << uploadInfo.result.name;
             qDebug() << uploadInfo.result.parent;
@@ -52,14 +52,29 @@ void Upload::setUploadConfig(QString filesPath)
         }
         else
         {
+            qDebug() << QStringLiteral("%1 error:%2").arg("/v1/store/token").arg(ret);
         }
     }
 }
 
-upload_result Upload::getUploadInfo(QByteArray ba)
+void Upload::bput_url(QString ctx, int offset)
+{
+    bputUrl = QString("/bput/%1/%2").arg(ctx).arg(offset);
+}
+
+void Upload::block_url(int size, int block_num)
+{
+    blockUrl = QString("/mkblk/%1/%2").arg(size).arg(block_num);
+}
+
+void Upload::file_url()
+{
+    fileUrl = QString("/mkfile/%1").arg(file_size);
+}
+
+void Upload::getUploadInfo(QByteArray ba)
 {
     QJsonParseError Error;
-    upload_result uploadInfo;
     QJsonDocument Json = QJsonDocument::fromJson(ba, &Error);
     if(Error.error == QJsonParseError::NoError){
         if(Json.isObject()){
@@ -131,6 +146,5 @@ upload_result Upload::getUploadInfo(QByteArray ba)
                     uploadInfo.token = token.toString();
             }
         }
-        return uploadInfo;
     }
 }

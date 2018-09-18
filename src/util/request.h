@@ -69,6 +69,7 @@ public:
      */
     QNetworkReply::NetworkError sendPostRequest(QString website, const QByteArray & postBa, QByteArray& retBa, int timeOutms=3000);
     QNetworkReply::NetworkError sendPostRequest(QString website, QString Token, const QByteArray &postBa, QByteArray &retBa, int timeOutms=3000);
+    QNetworkReply::NetworkError uploadRequest(QString website, QString uuid, QString Token, const QByteArray &postBa, QByteArray &retBa, int timeOutms=3000);
 protected slots:
     void slot_error(QNetworkReply::NetworkError code);
 private:

@@ -44,9 +44,17 @@ private:
     QString token;
     QString url;
 
+    QString bputUrl;
+    QString blockUrl;
+    QString fileUrl;
+
     ConfigSetting *setting;
 
-    upload_result getUploadInfo(QByteArray ba);
+    void getUploadInfo(QByteArray ba);
+    upload_result uploadInfo;
+    void bput_url(QString ctx, int offset);
+    void block_url(int size, int bolck_num);
+    void file_url();
 };
 
 #endif // UPLOAD_H

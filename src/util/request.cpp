@@ -222,6 +222,48 @@ QNetworkReply::NetworkError WebServiceHelp:: sendPostRequest(QString website, QS
     m_errCode= QNetworkReply::NoError;
     return retError;
 }
+
+QNetworkReply::NetworkError WebServiceHelp:: uploadRequest(QString website, QString uuid, QString Token, const QByteArray &postBa, QByteArray &retBa, int timeOutms)
+{
+    QString urlStr =website;
+    QNetworkReply::NetworkError retError = QNetworkReply::NoError;
+    m_errCode= QNetworkReply::NoError;
+    QByteArray bearer;
+    QNetworkRequest request;
+    QSslConfiguration config;
+    config.setPeerVerifyMode(QSslSocket::VerifyNone);
+    config.setProtocol(QSsl::TlsV1SslV3);
+    request.setSslConfiguration(config);
+     QUrl url(QString("https://upload-vod-v1.qiecdn.com%1").arg(urlStr));
+    request.setUrl(url);
+    request.setHeader(QNetworkRequest::ContentTypeHeader,"application/json");
+    request.setHeader(QNetworkRequest::ContentLengthHeader,postBa.length());
+    bearer.append(Token);
+    request.setRawHeader("Authorization", bearer);
+    request.setRawHeader("uploadBatch", uuid.toLatin1());
+    QNetworkReply *reply = manager->post(request,postBa);
+    connect(reply,static_cast<void (QNetworkReply::*)(QNetworkReply::NetworkError)>(&QNetworkReply::error),this,&WebServiceHelp::slot_error);
+    QEventLoop eventLoop;
+    NetDataListenerThread * thread = new NetDataListenerThread(manager,reply,timeOutms);
+    connect(thread, &NetDataListenerThread::finished,&eventLoop,&QEventLoop::quit);
+    thread->start();
+    eventLoop.exec();
+    if(thread->getIsWaitTimeOut())
+    {
+        retBa = reply->readAll();
+    }
+    else
+    {
+        m_errCode=QNetworkReply::TimeoutError;
+    }
+    thread->deleteLater();
+    delete reply;
+    delete thread;
+    thread = nullptr;
+    retError = m_errCode;
+    m_errCode= QNetworkReply::NoError;
+    return retError;
+}
 void WebServiceHelp::slot_error(QNetworkReply::NetworkError code)
 {
     m_errCode = code;
