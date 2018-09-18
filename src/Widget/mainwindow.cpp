@@ -100,22 +100,21 @@ void MainWindow::setUploadList()
     connect(pHeader, SIGNAL(stateChanged(int)), uploadModel, SLOT(onStateChanged(int)));
     connect(sendView->Upload->TableView, SIGNAL(clicked(QModelIndex)), this, SLOT(onClicked(QModelIndex)));
 
-    for (int i = 0; i < 5; ++i)
-    {
-        FilesStatusInfo record;
-        record.FileName = QString("/root/user/file%1.log").arg(i + 1);
-        record.Size = 1024 / ((i + 2) *(i + 2)) ;
-        record.nStatus = i;
-        record.nProgress = qrand() % 100 + 1;
+//    for (int i = 0; i < 5; ++i)
+//    {
+//        FilesStatusInfo record;
+//        record.FileName = QString("/root/user/file%1.log").arg(i + 1);
+//        record.Size = 1024 / ((i + 2) *(i + 2)) ;
+//        record.nStatus = i;
+//        record.nProgress = qrand() % 100 + 1;
 
-        uploadInfoList.append(record);
-    }
-    uploadModel->updateData(uploadInfoList);
+//        uploadInfoList.append(record);
+//    }
+//    uploadModel->updateData(uploadInfoList);
 }
 
 void MainWindow::updateUploadList(QList<FilesStatusInfo> filesStatusInfo){
-//    qDebug() << filesStatusInfo[0].nProgress;
-//    uploadModel->updateData(filesStatusInfo);
+    uploadModel->updateData(filesStatusInfo);
 }
 
 void MainWindow::setAllFilesList()

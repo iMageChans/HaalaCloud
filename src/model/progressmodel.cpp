@@ -1,6 +1,7 @@
 ﻿#include "progressmodel.h"
 
 #include <QColor>
+#include <QDebug>
 
 ProgressModel::ProgressModel(QObject *parent)
     : QAbstractItemModel(parent)
@@ -109,6 +110,7 @@ bool ProgressModel::setData(const QModelIndex &index, const QVariant &value, int
             if (nColumn == 3)
             {
                 record.nProgress = value.toInt();
+                qDebug() << record.nProgress;
                 m_recordList.replace(index.row(), record);
             }
         }
