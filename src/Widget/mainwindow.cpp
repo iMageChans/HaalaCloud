@@ -8,6 +8,7 @@
 #include "src/util/tool.h"
 #include "src/util/request.h"
 #include "src/Widget/login.h"
+#include "src/model/upload.h"
 
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -39,6 +40,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(FDT, SIGNAL(finished()), FDT, SLOT(deleteLater()));
     FDT->start();
     setting = new ConfigSetting;
+
+    Upload *upload = new Upload;
+    upload->setUploadConfig("C:\\Users\\Chans\\Downloads\\Win32OpenSSL-1_0_1g.exe");
 }
 
 void MainWindow::setNetwork()

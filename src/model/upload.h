@@ -45,6 +45,8 @@ private:
     QString url;
 
     ConfigSetting *setting;
+
+    upload_result getUploadInfo(QByteArray ba);
 };
 
 #endif // UPLOAD_H

@@ -81,13 +81,12 @@ void Login::UserInfo_Login()
 {
     ui->LogonButton->setCheckable(true);
     QByteArray ba;
-    QByteArray postBa;
     QJsonObject Json;
     Json.insert("value", ui->UserName->text());
     Json.insert("password", ui->Password->text());
     QJsonDocument docum;
     docum.setObject(Json);
-    postBa = docum.toJson(QJsonDocument::Compact);
+    QByteArray postBa = docum.toJson(QJsonDocument::Compact);
     QNetworkReply::NetworkError ret= WebServiceHelp::getInstance()->sendPostRequest("/v1/user/login", postBa, ba);
     if(ret==QNetworkReply::NoError)
     {
