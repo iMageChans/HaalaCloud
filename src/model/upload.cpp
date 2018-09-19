@@ -9,7 +9,10 @@
 
 #include <QDebug>
 
-Upload::Upload(QObject *parent) : QObject(parent)
+Upload::Upload(QObject *parent) : QObject(parent),
+    block_size(1024 * 1024 * 4),
+    bput_size(512 * 1024),
+    concurrency(4)
 {
     setting = new ConfigSetting;
 }
@@ -38,17 +41,6 @@ void Upload::setUploadConfig(QString filesPath)
         if(ret==QNetworkReply::NoError)
         {
             getUploadInfo(ba);
-            qDebug() << uploadInfo.code;
-            qDebug() << uploadInfo.result.name;
-            qDebug() << uploadInfo.result.parent;
-            qDebug() << uploadInfo.result.path;
-            qDebug() << uploadInfo.result.token;
-            qDebug() << uploadInfo.result.type;
-            qDebug() << uploadInfo.result.uploadUrl;
-            qDebug() << uploadInfo.result.version;
-            qDebug() << uploadInfo.status;
-            qDebug() << uploadInfo.success;
-            qDebug() << uploadInfo.token;
         }
         else
         {
@@ -57,12 +49,29 @@ void Upload::setUploadConfig(QString filesPath)
     }
 }
 
+void Upload::make_block(uint offset)
+{
+    mlk_url(offset);
+}
+
+void Upload::mlk_url(uint offset)
+{
+    block_id = offset / block_size;
+    if (block_id < block_number -1)
+    {
+        size = block_size;
+    }else{
+        size = uint(file_size - (block_id * block_size));
+    }
+    block_url(size, block_id);
+}
+
 void Upload::bput_url(QString ctx, int offset)
 {
     bputUrl = QString("/bput/%1/%2").arg(ctx).arg(offset);
 }
 
-void Upload::block_url(int size, int block_num)
+void Upload::block_url(uint size, uint block_num)
 {
     blockUrl = QString("/mkblk/%1/%2").arg(size).arg(block_num);
 }

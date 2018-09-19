@@ -38,23 +38,27 @@ private:
     qint64 file_size;
     QString path;
     QString file_name;
-    int progress;
-    int concurrency;
-    int block_number;
+    uint progress;
+    uint concurrency;
+    uint block_number;
+    uint size;
     QString token;
     QString url;
 
     QString bputUrl;
     QString blockUrl;
     QString fileUrl;
+    uint block_id;
 
     ConfigSetting *setting;
 
     void getUploadInfo(QByteArray ba);
     upload_result uploadInfo;
     void bput_url(QString ctx, int offset);
-    void block_url(int size, int bolck_num);
+    void block_url(uint size, uint bolck_num);
     void file_url();
+    void make_block(uint offset);
+    void mlk_url(uint offset);
 };
 
 #endif // UPLOAD_H
