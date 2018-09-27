@@ -16,6 +16,8 @@
 #include <QListWidgetItem>
 #include <QPixmap>
 #include <QPainter>
+#include <QDesktopServices>
+#include <QFileDialog>
 
 #include <QDebug>
 #include <QSortFilterProxyModel>
@@ -42,7 +44,8 @@ MainWindow::MainWindow(QWidget *parent) :
     setting = new ConfigSetting;
 
     Upload *upload = new Upload;
-    upload->setUploadConfig("C:\\Users\\Chans\\Downloads\\Win32OpenSSL-1_0_1g.exe");
+    QString fileName = QFileDialog::getOpenFileName(this,tr("打开文件"),".",tr("All Files(*.*)"));
+    upload->setUploadConfig(fileName);
 }
 
 void MainWindow::setNetwork()
@@ -103,18 +106,6 @@ void MainWindow::setUploadList()
     connect(uploadModel, SIGNAL(stateChanged(int)), pHeader, SLOT(onStateChanged(int)));
     connect(pHeader, SIGNAL(stateChanged(int)), uploadModel, SLOT(onStateChanged(int)));
     connect(sendView->Upload->TableView, SIGNAL(clicked(QModelIndex)), this, SLOT(onClicked(QModelIndex)));
-
-//    for (int i = 0; i < 5; ++i)
-//    {
-//        FilesStatusInfo record;
-//        record.FileName = QString("/root/user/file%1.log").arg(i + 1);
-//        record.Size = 1024 / ((i + 2) *(i + 2)) ;
-//        record.nStatus = i;
-//        record.nProgress = qrand() % 100 + 1;
-
-//        uploadInfoList.append(record);
-//    }
-//    uploadModel->updateData(uploadInfoList);
 }
 
 void MainWindow::updateUploadList(QList<FilesStatusInfo> filesStatusInfo){

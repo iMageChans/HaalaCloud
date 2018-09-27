@@ -2,6 +2,7 @@
 #define UPLOAD_H
 
 #include <QObject>
+#include <QNetworkAccessManager>
 #include "src/util/configsetting.h"
 
 typedef struct{
@@ -28,37 +29,40 @@ class Upload : public QObject
 public:
     explicit Upload(QObject *parent = nullptr);
     void setUploadConfig(QString filesPath);
+    void make_block(int offset);
 signals:
 
 public slots:
 
 private:
-    size_t block_size;
-    size_t bput_size;
+    int block_size;
+    int bput_size;
     qint64 file_size;
     QString path;
     QString file_name;
+    QString file_path;
     uint progress;
     uint concurrency;
-    uint block_number;
-    uint size;
+    int block_number;
+    int size;
     QString token;
     QString url;
 
     QString bputUrl;
     QString blockUrl;
     QString fileUrl;
-    uint block_id;
+    int block_id;
+
+    QNetworkAccessManager *manager;
 
     ConfigSetting *setting;
 
     void getUploadInfo(QByteArray ba);
     upload_result uploadInfo;
     void bput_url(QString ctx, int offset);
-    void block_url(uint size, uint bolck_num);
+    void block_url(int size, int bolck_num);
     void file_url();
-    void make_block(uint offset);
-    void mlk_url(uint offset);
+    void mlk_url(int offset);
 };
 
 #endif // UPLOAD_H

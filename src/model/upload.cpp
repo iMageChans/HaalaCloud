@@ -5,7 +5,10 @@
 #include <QByteArray>
 #include <QJsonObject>
 #include <QJsonDocument>
+#include <QDataStream>
 #include <QCryptographicHash>
+#include <QIODevice>
+#include <QUuid>
 
 #include <QDebug>
 
@@ -23,9 +26,10 @@ void Upload::setUploadConfig(QString filesPath)
     if (info.exists()){
         file_size = info.size();
         file_name = info.fileName();
+        file_path = info.absoluteFilePath();
         path = "/";
 
-        QFile file(filesPath);
+        QFile file(file_path);
         file.open(QIODevice::ReadOnly);
         QByteArray hash = QCryptographicHash::hash(file.readAll(),QCryptographicHash::Sha1);
 
@@ -40,7 +44,11 @@ void Upload::setUploadConfig(QString filesPath)
         QNetworkReply::NetworkError ret= WebServiceHelp::getInstance()->sendPostRequest("/v1/store/token", setting->getSystemConfig("token"), postBa, ba);
         if(ret==QNetworkReply::NoError)
         {
+            QUuid id = QUuid::createUuid();
+            QString tmp = id.toString();
+            qDebug() << tmp;
             getUploadInfo(ba);
+            make_block(1);
         }
         else
         {
@@ -49,36 +57,51 @@ void Upload::setUploadConfig(QString filesPath)
     }
 }
 
-void Upload::make_block(uint offset)
+void Upload::make_block(int offset)
 {
+    QByteArray ba;
+    QString uuid;
     mlk_url(offset);
+
+    QFile f(file_path);
+    f.open(QIODevice::ReadOnly);
+    QDataStream bput_file(&f);
+    qDebug() << bput_file;
+    auto offsets = 0;
+    auto mkblk_retries = 3;
+    for (int i = 0; i < file_size / block_size; ++i){
+        char *buff;
+        bput_file.readRawData(buff, bput_size);
+        offsets += size;
+        qDebug() << buff;
+    }
 }
 
-void Upload::mlk_url(uint offset)
+void Upload::mlk_url(int offset)
 {
     block_id = offset / block_size;
     if (block_id < block_number -1)
     {
         size = block_size;
     }else{
-        size = uint(file_size - (block_id * block_size));
+        size = int(file_size - (block_id * block_size));
     }
     block_url(size, block_id);
 }
 
 void Upload::bput_url(QString ctx, int offset)
 {
-    bputUrl = QString("/bput/%1/%2").arg(ctx).arg(offset);
+    bputUrl = QString("%1/bput/%2/%3").arg(uploadInfo.result.uploadUrl).arg(ctx).arg(offset);
 }
 
-void Upload::block_url(uint size, uint block_num)
+void Upload::block_url(int size, int block_num)
 {
-    blockUrl = QString("/mkblk/%1/%2").arg(size).arg(block_num);
+    blockUrl = QString("%1/mkblk/%2/%3").arg(uploadInfo.result.uploadUrl).arg(size).arg(block_num);
 }
 
 void Upload::file_url()
 {
-    fileUrl = QString("/mkfile/%1").arg(file_size);
+    fileUrl = QString("%1/mkfile/%2").arg(uploadInfo.result.uploadUrl).arg(file_size);
 }
 
 void Upload::getUploadInfo(QByteArray ba)

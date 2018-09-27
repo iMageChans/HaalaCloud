@@ -12,7 +12,7 @@ class NetDataListenerThread:public QThread
 {
     Q_OBJECT
 public:
-    NetDataListenerThread(QNetworkAccessManager *manager,QNetworkReply * reply,int timeoutms,QObject *parent = 0);
+    NetDataListenerThread(QNetworkAccessManager *manager,QNetworkReply * reply,int timeoutms,QObject *parent = nullptr);
     ~NetDataListenerThread();
     QByteArray getBa() const;
     bool getIsWaitTimeOut() const;
