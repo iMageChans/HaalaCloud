@@ -37,6 +37,7 @@ Login::Login(QWidget *parent) :
     if(ui->AotuLogin->checkState() == Qt::Checked){
         if (setting->getSystemConfig("token").length() > 0){
             ui->LogonButton->setCheckable(true);
+            qDebug() << setting->getSystemConfig("token");
             autoTime = 1;
             timer = new QTimer(this);
             connect(timer, SIGNAL(timeout()), this, SLOT(showTimelimit()));

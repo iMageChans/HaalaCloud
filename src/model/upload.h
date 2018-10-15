@@ -53,12 +53,13 @@ private:
     QString fileUrl;
     int block_id;
 
+    upload_result uploadInfo;
+
     QNetworkAccessManager *manager;
 
     ConfigSetting *setting;
 
     void getUploadInfo(QByteArray ba);
-    upload_result uploadInfo;
     void bput_url(QString ctx, int offset);
     void block_url(int size, int bolck_num);
     void file_url();
