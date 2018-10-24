@@ -51,7 +51,7 @@ signals:
 public slots:
 
 private:
-    int block_size;
+    uint block_size;
     int bput_size;
     qint64 file_size;
     QString path;
@@ -80,8 +80,8 @@ private:
     void block_url(int size, int bolck_num);
     void file_url();
     void mlk_url(int offset);
-    void create_block(QDataStream &block_file, char *buff);
-    void create_bput(QDataStream &bput_file, char *bput_buff);
+    void create_block(QDataStream &block_file, char &buff);
+    void create_bput(QDataStream &bput_file, char &bput_buff);
 };
 
 #endif // UPLOAD_H

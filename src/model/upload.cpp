@@ -67,18 +67,18 @@ void Upload::make_block(int offset)
     f.open(QIODevice::ReadOnly);
     QDataStream Block_file(&f);
     char *buff;
-    create_block(Block_file, buff);
+    Block_file.readBytes(buff, block_size);
     qDebug() << buff;
 }
 
-void Upload::create_block(QDataStream &block_file, char *buff)
+void Upload::create_block(QDataStream &block_file, char &buff)
 {
-    block_file.readRawData(buff, block_size);
+//    block_file.readRawData(buff, block_size);
 }
 
-void Upload::create_bput(QDataStream &bput_file, char *bput_buff)
+void Upload::create_bput(QDataStream &bput_file, char &bput_buff)
 {
-    bput_file.readRawData(bput_buff, bput_size);
+//    bput_file.readRawData(bput_buff, bput_size);
 }
 
 void Upload::mlk_url(int offset)
