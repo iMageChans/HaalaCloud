@@ -1,9 +1,25 @@
-#ifndef UPLOAD_H
+﻿#ifndef UPLOAD_H
 #define UPLOAD_H
 
 #include <QObject>
 #include <QNetworkAccessManager>
 #include "src/util/configsetting.h"
+
+typedef struct{
+    int Bput_number;
+    int Bput_count;
+    int Bput_Size;
+    char bput;
+}Bput;
+
+typedef struct{
+    int Block_number;
+    int Block_count;
+    int Block_Size;
+    QString uuid;
+    Bput bput;
+    Bput bputArray[];
+}Block;
 
 typedef struct{
     QString name;
@@ -64,6 +80,8 @@ private:
     void block_url(int size, int bolck_num);
     void file_url();
     void mlk_url(int offset);
+    void create_block(QDataStream &block_file, char *buff);
+    void create_bput(QDataStream &bput_file, char *bput_buff);
 };
 
 #endif // UPLOAD_H

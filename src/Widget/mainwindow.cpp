@@ -43,9 +43,9 @@ MainWindow::MainWindow(QWidget *parent) :
     FDT->start();
     setting = new ConfigSetting;
 
-    Upload *upload = new Upload;
-    QString fileName = QFileDialog::getOpenFileName(this,tr("打开文件"),".",tr("All Files(*.*)"));
-    upload->setUploadConfig(fileName);
+//    Upload *upload = new Upload;
+//    QString fileName = QFileDialog::getOpenFileName(this,tr("打开文件"),".",tr("All Files(*.*)"));
+//    upload->setUploadConfig(fileName);
 }
 
 void MainWindow::setNetwork()
@@ -74,14 +74,25 @@ void MainWindow::setUploadList()
     pHeader->setSectionResizeMode(QHeaderView::Stretch);
 
 #if defined(Q_OS_MAC)
+    CheckBoxDelegate *pDelegate = new CheckBoxDelegate(this);
+    sendView->Upload->TableView->setItemDelegate(pDelegate);
+
+    TableViewDelegate *tableViewDelegate = new TableViewDelegate(this);
+    sendView->Upload->TableView->setItemDelegate(tableViewDelegate);
+    tableViewDelegate->setColumn(4);
+
+    ProgressBarDelegate *progressDelegate = new ProgressBarDelegate(this);
+    sendView->Upload->TableView->setItemDelegate(progressDelegate);
+
     pHeader->setSectionResizeMode(0, QHeaderView::Fixed);
     pHeader->setSectionResizeMode(2, QHeaderView::Fixed);
     pHeader->setSectionResizeMode(3, QHeaderView::Fixed);
+    pHeader->setSectionResizeMode(4, QHeaderView::Fixed);
 
-    content->Files->TableView->setColumnWidth(0, 30);
-    content->Files->TableView->setColumnWidth(2, 150);
-    content->Files->TableView->setColumnWidth(3, 150);
-    content->Files->TableView->setColumnHidden(4, true);
+    sendView->Upload->TableView->setColumnWidth(0, 30);
+    sendView->Upload->TableView->setColumnWidth(2, 150);
+    sendView->Upload->TableView->setColumnWidth(3, 200);
+    sendView->Upload->TableView->setColumnWidth(4, 150);
 #elif defined(Q_OS_WIN32)
     CheckBoxDelegate *pDelegate = new CheckBoxDelegate(this);
     sendView->Upload->TableView->setItemDelegate(pDelegate);
@@ -126,14 +137,23 @@ void MainWindow::setAllFilesList()
     pHeader->setSectionResizeMode(QHeaderView::Stretch);
 
 #if defined(Q_OS_MAC)
+    CheckBoxDelegate *pDelegate = new CheckBoxDelegate(this);
+    content->Files->TableView->setItemDelegate(pDelegate);
+
+    TableViewDelegate *tableViewDelegate = new TableViewDelegate(this);
+    content->Files->TableView->setItemDelegate(tableViewDelegate);
+    tableViewDelegate->setColumn(2);
+
     pHeader->setSectionResizeMode(0, QHeaderView::Fixed);
     pHeader->setSectionResizeMode(2, QHeaderView::Fixed);
     pHeader->setSectionResizeMode(3, QHeaderView::Fixed);
+    pHeader->setSectionResizeMode(4, QHeaderView::Fixed);
 
     content->Files->TableView->setColumnWidth(0, 30);
-    content->Files->TableView->setColumnWidth(2, 150);
-    content->Files->TableView->setColumnWidth(3, 150);
-    content->Files->TableView->setColumnHidden(4, true);
+    content->Files->TableView->setColumnWidth(2, 80);
+    content->Files->TableView->setColumnWidth(3, 100);
+    content->Files->TableView->setColumnWidth(4, 150);
+    content->Files->TableView->setColumnHidden(5, true);
 #elif defined(Q_OS_WIN32)
     CheckBoxDelegate *pDelegate = new CheckBoxDelegate(this);
     content->Files->TableView->setItemDelegate(pDelegate);
@@ -223,6 +243,8 @@ void MainWindow::setUserInfo(User user)
     ui->progressBar->setValue(int(user.result.spaceUsed));
 
     Tool *tool = new Tool;
+    qDebug() << user.result.spaceUsed;
+    qDebug() << user.result.spaceCapacity;
     ui->capacity->setText(QString("%1/%2").arg(user.result.spaceUsed / 1024).arg(tool->bytesToGBMBKB(user.result.spaceCapacity)));
 }
 

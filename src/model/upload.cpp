@@ -1,4 +1,4 @@
-#include "upload.h"
+﻿#include "upload.h"
 #include "src/util/request.h"
 
 #include <QFileInfo>
@@ -65,16 +65,20 @@ void Upload::make_block(int offset)
 
     QFile f(file_path);
     f.open(QIODevice::ReadOnly);
-    QDataStream bput_file(&f);
-    qDebug() << bput_file;
-    auto offsets = 0;
-    auto mkblk_retries = 3;
-    for (int i = 0; i < file_size / block_size; ++i){
-        char *buff;
-        bput_file.readRawData(buff, bput_size);
-        offsets += size;
-        qDebug() << buff;
-    }
+    QDataStream Block_file(&f);
+    char *buff;
+    create_block(Block_file, buff);
+    qDebug() << buff;
+}
+
+void Upload::create_block(QDataStream &block_file, char *buff)
+{
+    block_file.readRawData(buff, block_size);
+}
+
+void Upload::create_bput(QDataStream &bput_file, char *bput_buff)
+{
+    bput_file.readRawData(bput_buff, bput_size);
 }
 
 void Upload::mlk_url(int offset)

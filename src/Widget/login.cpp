@@ -68,7 +68,7 @@ void Login::Token_Login()
     }
     else
     {
-        qDebug() << QStringLiteral("%1 error:%2").arg("/v1/user/infon").arg(ret);
+        qDebug() << QStringLiteral("%1 error:%2").arg("/v1/user/info").arg(ret);
         ui->LogonButton->setCheckable(false);
         ui->Remember->setCheckState(Qt::Unchecked);
         ui->AotuLogin->setCheckState(Qt::Unchecked);
