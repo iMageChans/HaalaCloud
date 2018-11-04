@@ -27,6 +27,7 @@ Login::Login(QWidget *parent) :
     }
 
     if (setting->getSystemConfig("token").length() > 0){
+        qDebug() << setting->getSystemConfig("token");
         Token = setting->getSystemConfig("token");
         connect(ui->LogonButton, SIGNAL(clicked()), this, SLOT(Token_Login()));
     }else{
@@ -37,11 +38,9 @@ Login::Login(QWidget *parent) :
     if(ui->AotuLogin->checkState() == Qt::Checked){
         if (setting->getSystemConfig("token").length() > 0){
             ui->LogonButton->setCheckable(true);
-            qDebug() << setting->getSystemConfig("token");
             autoTime = 1;
             timer = new QTimer(this);
             connect(timer, SIGNAL(timeout()), this, SLOT(showTimelimit()));
-            qDebug() << "1";
             timer->start(500);
         }
     }
@@ -91,6 +90,7 @@ void Login::UserInfo_Login()
     QNetworkReply::NetworkError ret= WebServiceHelp::getInstance()->sendPostRequest("/v1/user/login", postBa, ba);
     if(ret==QNetworkReply::NoError)
     {
+        qDebug() << setting->getSystemConfig("token");
         UserModel *model = new UserModel;
         model->setUserModel(ba);
         user = model->getUserModel();

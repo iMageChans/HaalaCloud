@@ -47,7 +47,8 @@ SOURCES += \
     src/model/download.cpp \
     src/Delegate/tableviewdelegate.cpp \
     src/util/filedownloadthread.cpp \
-    src/model/upload.cpp
+    src/model/upload.cpp \
+    src/util/filesplitutils.cpp
 
 HEADERS += \
         src/Widget/mainwindow.h \
@@ -73,7 +74,8 @@ HEADERS += \
     src/model/download.h \
     src/Delegate/tableviewdelegate.h \
     src/util/filedownloadthread.h \
-    src/model/upload.h
+    src/model/upload.h \
+    src/util/filesplitutils.h
 
 FORMS += \
         src/Widget/mainwindow.ui \
