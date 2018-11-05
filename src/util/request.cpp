@@ -223,7 +223,7 @@ QNetworkReply::NetworkError WebServiceHelp:: sendPostRequest(QString website, QS
     return retError;
 }
 
-QNetworkReply::NetworkError WebServiceHelp:: uploadRequest(QString website, QString uuid, QString Token, const QByteArray &postBa, QByteArray &retBa, int timeOutms)
+QNetworkReply::NetworkError WebServiceHelp:: uploadRequest(QString website, QString uuid, QString Token, QString header, QString length,const QByteArray &postBa, QByteArray &retBa, int timeOutms)
 {
     QString urlStr = website;
     QNetworkReply::NetworkError retError = QNetworkReply::NoError;
@@ -236,8 +236,8 @@ QNetworkReply::NetworkError WebServiceHelp:: uploadRequest(QString website, QStr
     request.setSslConfiguration(config);
     QUrl url(QString("%1").arg(urlStr));
     request.setUrl(url);
-    request.setHeader(QNetworkRequest::ContentTypeHeader,"application/json");
-    request.setHeader(QNetworkRequest::ContentLengthHeader,postBa.length());
+    request.setHeader(QNetworkRequest::ContentTypeHeader,header);
+    request.setHeader(QNetworkRequest::ContentLengthHeader,length);
     bearer.append(Token);
     request.setRawHeader("Authorization", bearer);
     request.setRawHeader("uploadBatch", uuid.toLatin1());

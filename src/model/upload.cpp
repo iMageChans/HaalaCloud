@@ -60,10 +60,7 @@ void Upload::setUploadConfig(QString filesPath)
 
 void Upload::Run()
 {
-    QFile srcFile(file_name);
-    QNetworkRequest request;
-    QEventLoop temp_loop;
-    QEventLoop mkflie_loop;
+    QFile srcFile(file_path);
     QUuid id = QUuid::createUuid();
     QString strId = id.toString();
     if(srcFile.open(QIODevice::ReadOnly)){
@@ -82,36 +79,32 @@ void Upload::Run()
             while(copySize>0){
                   size=(copySize>buffSize)?buffSize:copySize;
                   srcFile.read(buff,size);
-                  QNetworkAccessManager *manager = new QNetworkAccessManager(this);
                   QByteArray data = QByteArray(buff, buffSize);
-                  request.setUrl(QUrl(QString("%1/mkblk/%2/%3").arg(uploadInfo.result.uploadUrl).arg(size).arg(i)));
-                  request.setRawHeader("Authorization", uploadInfo.result.token.toLatin1());
-                  request.setRawHeader("Content-Length", QString::number(size).toLatin1());
-                  request.setRawHeader("Content-Type", "application/octet-stream");
-                  request.setRawHeader("UploadBatch", strId.toLatin1());
-                  QNetworkReply *reply  = manager->post(request, data);
-                  connect(reply, SIGNAL(finished()), &temp_loop, SLOT(quit()));
-                  temp_loop.exec();
-                  qDebug()<<"start";
-                  QVariant statusCodeV=reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
-                  QVariant redirectionTargetUrl=reply->attribute(QNetworkRequest::RedirectionTargetAttribute);
-                  if(reply->error()==QNetworkReply::NoError)
+                  QByteArray result;
+                  QNetworkReply::NetworkError ret= WebServiceHelp::getInstance()->uploadRequest(QString("%1/mkblk/%2/%3").arg(uploadInfo.result.uploadUrl).arg(size).arg(i),
+                                                                                                strId,
+                                                                                                uploadInfo.result.token,
+                                                                                                "application/octet-stream",
+                                                                                                QString::number(size),
+                                                                                                data,
+                                                                                                result);
+                  if(ret==QNetworkReply::NoError)
                   {
-                      QByteArray bytes = reply->readAll();
-                      blocksInfo.append(getMultipartUploadResult(bytes, i, strId));
+                      qDebug() << result;
+                      blocksInfo.append(getMultipartUploadResult(result, i, strId));
+                      copySize-=size;
+                      count+=size;
                   }
-                  reply->deleteLater();
-                  qDebug()<<"finished";
-                  copySize-=size;
-                  count+=size;
+                  else
+                  {
+                      qDebug() << QStringLiteral("%1 error:%2").arg(QString("%1/mkblk/%2/%3").arg(uploadInfo.result.uploadUrl).arg(size).arg(i)).arg(ret);
+                  }
             }
         }
         delete buff;
         srcFile.close();
-        QNetworkRequest requests;
         QStringList ctxs;
         QStringList ctxSizes;
-        QNetworkAccessManager *managers = new QNetworkAccessManager(this);
         for(int i=0;i<blocksInfo.length();i++){
             BlockInfo data = blocksInfo[i];
             ctxs << data.ctx;
@@ -120,18 +113,22 @@ void Upload::Run()
         QString ctxsString = ctxs.join(",");
         QString ctxSizesString = ctxSizes.join(",");
         QByteArray data = ctxsString.toLatin1();
-        requests.setUrl(QUrl(QString("%1/mkfile/%2").arg(uploadInfo.result.uploadUrl).arg(fileSize)));
-        requests.setRawHeader("Authorization", uploadInfo.result.token.toLatin1());
-        request.setRawHeader("Content-Length", ctxSizesString.toLatin1());
-        requests.setRawHeader("Content-Type", "text/plain");
-        requests.setRawHeader("UploadBatch", strId.toLatin1());
-        QNetworkReply *reply  = managers->post(requests, data);
-        connect(reply, SIGNAL(finished()), &mkflie_loop, SLOT(quit()));
-        mkflie_loop.exec();
-        QVariant statusCodeV=reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
-        QVariant redirectionTargetUrl=reply->attribute(QNetworkRequest::RedirectionTargetAttribute);
-        QByteArray bytes = reply->readAll();
-        reply->deleteLater();
+        QByteArray result;
+        QNetworkReply::NetworkError ret= WebServiceHelp::getInstance()->uploadRequest(QString("%1/mkfile/%2").arg(uploadInfo.result.uploadUrl).arg(fileSize),
+                                                                                      strId,
+                                                                                      uploadInfo.result.token,
+                                                                                      "text/plain",
+                                                                                      ctxSizesString,
+                                                                                      data,
+                                                                                      result);
+        if(ret==QNetworkReply::NoError)
+        {
+            qDebug() << result;
+        }
+        else
+        {
+            qDebug() << QStringLiteral("%1 error:%2").arg(QString("%1/mkfile/%2").arg(uploadInfo.result.uploadUrl).arg(fileSize)).arg(ret);
+        }
     }
 }
 

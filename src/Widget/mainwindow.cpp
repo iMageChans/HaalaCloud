@@ -47,10 +47,16 @@ MainWindow::MainWindow(QWidget *parent) :
 void MainWindow::setNetwork()
 {
     QByteArray ba;
-    QNetworkReply::NetworkError ret= WebServiceHelp::getInstance()->sendPostRequest("/v1/files/page", setting->getSystemConfig("token"), QByteArray(), ba);
+    QJsonObject Json;
+    Json.insert("pageSize", 999);
+    QJsonDocument docum;
+    docum.setObject(Json);
+    QByteArray postBa = docum.toJson(QJsonDocument::Compact);
+    QNetworkReply::NetworkError ret= WebServiceHelp::getInstance()->sendPostRequest("/v1/files/page", setting->getSystemConfig("token"), postBa, ba);
     if(ret==QNetworkReply::NoError){
         FilesModel *model = new FilesModel;
         model->setFilesModel(ba);
+        qDebug() << ba;
         Files files = model->getFilesModel();
         FilesList = files.result.list;
     }else{
