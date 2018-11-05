@@ -49,6 +49,7 @@ void Upload::setUploadConfig(QString filesPath)
             QUuid id = QUuid::createUuid();
             QString tmp = id.toString();
             getUploadInfo(ba);
+            Run();
         }
         else
         {
