@@ -1,6 +1,7 @@
 ﻿#include "detail.h"
 #include "ui_detail.h"
 #include "src/model/upload.h"
+#include <QFileDialog>
 
 detail::detail(QWidget *parent) :
     QWidget(parent),
@@ -44,7 +45,7 @@ detail::~detail()
 
 void detail::on_Upload_clicked()
 {
-        Upload *upload = new Upload;
-        QString fileName = QFileDialog::getOpenFileName(this,tr("打开文件"),".",tr("All Files(*.*)"));
-        upload->setUploadConfig(fileName);
+    Upload *upload = new Upload;
+    QString fileName = QFileDialog::getOpenFileName(this,tr("打开文件"),".",tr("All Files(*.*)"));
+    upload->setUploadConfig(fileName);
 }

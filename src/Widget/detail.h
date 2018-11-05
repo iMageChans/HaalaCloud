@@ -18,6 +18,9 @@ public:
 
     QTableView *TableView;
 
+private slots:
+    void on_Upload_clicked();
+
 private:
     Ui::detail *ui;
 };

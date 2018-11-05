@@ -42,10 +42,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(FDT, SIGNAL(finished()), FDT, SLOT(deleteLater()));
     FDT->start();
     setting = new ConfigSetting;
-
-//    Upload *upload = new Upload;
-//    QString fileName = QFileDialog::getOpenFileName(this,tr("打开文件"),".",tr("All Files(*.*)"));
-//    upload->setUploadConfig(fileName);
 }
 
 void MainWindow::setNetwork()
