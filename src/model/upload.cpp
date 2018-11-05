@@ -1,5 +1,6 @@
 ﻿#include "upload.h"
 #include "src/util/request.h"
+#include "src/util/filesplitutils.h"
 
 #include <QFileInfo>
 #include <QByteArray>
@@ -12,9 +13,10 @@
 
 #include <QDebug>
 
+const qint64 BUFF_SIZE_MB = 4*1024*1024;
+
 Upload::Upload(QObject *parent) : QObject(parent),
     block_size(1024 * 1024 * 4),
-    bput_size(512 * 1024),
     concurrency(4)
 {
     setting = new ConfigSetting;
@@ -46,9 +48,7 @@ void Upload::setUploadConfig(QString filesPath)
         {
             QUuid id = QUuid::createUuid();
             QString tmp = id.toString();
-            qDebug() << tmp;
             getUploadInfo(ba);
-            make_block(1);
         }
         else
         {
@@ -57,55 +57,120 @@ void Upload::setUploadConfig(QString filesPath)
     }
 }
 
-void Upload::make_block(int offset)
+void Upload::Run()
 {
-    QByteArray ba;
-    QString uuid;
-    mlk_url(offset);
-
-    QFile f(file_path);
-    f.open(QIODevice::ReadOnly);
-    QDataStream Block_file(&f);
-    char *buff;
-    Block_file.readBytes(buff, block_size);
-    qDebug() << buff;
-}
-
-void Upload::create_block(QDataStream &block_file, char &buff)
-{
-//    block_file.readRawData(buff, block_size);
-}
-
-void Upload::create_bput(QDataStream &bput_file, char &bput_buff)
-{
-//    bput_file.readRawData(bput_buff, bput_size);
-}
-
-void Upload::mlk_url(int offset)
-{
-    block_id = offset / block_size;
-    if (block_id < block_number -1)
-    {
-        size = block_size;
-    }else{
-        size = int(file_size - (block_id * block_size));
+    QFile srcFile(file_name);
+    QNetworkRequest request;
+    QEventLoop temp_loop;
+    QEventLoop mkflie_loop;
+    QUuid id = QUuid::createUuid();
+    QString strId = id.toString();
+    if(srcFile.open(QIODevice::ReadOnly)){
+        qint64 fileSize=srcFile.size();
+        qint64 mSplitSize = FileSplitUtils::getBlockFileSize();
+        int splitFileNum=(fileSize+mSplitSize-1)/mSplitSize;
+        qint64 count=0;
+        qint64 buffSize = BUFF_SIZE_MB;
+        char* buff=new char[buffSize];
+        QList<BlockInfo> blocksInfo;
+        for(int i=0;i<splitFileNum;i++){
+            qint64 copySize=0;
+            qint64 size = 0;
+            copySize=fileSize-count;
+            copySize=(copySize>mSplitSize)?mSplitSize:copySize;
+            while(copySize>0){
+                  size=(copySize>buffSize)?buffSize:copySize;
+                  srcFile.read(buff,size);
+                  QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+                  QByteArray data = QByteArray(buff, buffSize);
+                  request.setUrl(QUrl(QString("%1/mkblk/%2/%3").arg(uploadInfo.result.uploadUrl).arg(size).arg(i)));
+                  request.setRawHeader("Authorization", uploadInfo.result.token.toLatin1());
+                  request.setRawHeader("Content-Length", QString::number(size).toLatin1());
+                  request.setRawHeader("Content-Type", "application/octet-stream");
+                  request.setRawHeader("UploadBatch", strId.toLatin1());
+                  QNetworkReply *reply  = manager->post(request, data);
+                  connect(reply, SIGNAL(finished()), &temp_loop, SLOT(quit()));
+                  temp_loop.exec();
+                  qDebug()<<"start";
+                  QVariant statusCodeV=reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+                  QVariant redirectionTargetUrl=reply->attribute(QNetworkRequest::RedirectionTargetAttribute);
+                  if(reply->error()==QNetworkReply::NoError)
+                  {
+                      QByteArray bytes = reply->readAll();
+                      blocksInfo.append(getMultipartUploadResult(bytes, i, strId));
+                  }
+                  reply->deleteLater();
+                  qDebug()<<"finished";
+                  copySize-=size;
+                  count+=size;
+            }
+        }
+        delete buff;
+        srcFile.close();
+        QNetworkRequest requests;
+        QStringList ctxs;
+        QStringList ctxSizes;
+        QNetworkAccessManager *managers = new QNetworkAccessManager(this);
+        for(int i=0;i<blocksInfo.length();i++){
+            BlockInfo data = blocksInfo[i];
+            ctxs << data.ctx;
+            ctxSizes << QString::number(data.offset);
+        }
+        QString ctxsString = ctxs.join(",");
+        QString ctxSizesString = ctxSizes.join(",");
+        QByteArray data = ctxsString.toLatin1();
+        requests.setUrl(QUrl(QString("%1/mkfile/%2").arg(uploadInfo.result.uploadUrl).arg(fileSize)));
+        requests.setRawHeader("Authorization", uploadInfo.result.token.toLatin1());
+        request.setRawHeader("Content-Length", ctxSizesString.toLatin1());
+        requests.setRawHeader("Content-Type", "text/plain");
+        requests.setRawHeader("UploadBatch", strId.toLatin1());
+        QNetworkReply *reply  = managers->post(requests, data);
+        connect(reply, SIGNAL(finished()), &mkflie_loop, SLOT(quit()));
+        mkflie_loop.exec();
+        QVariant statusCodeV=reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+        QVariant redirectionTargetUrl=reply->attribute(QNetworkRequest::RedirectionTargetAttribute);
+        QByteArray bytes = reply->readAll();
+        reply->deleteLater();
     }
-    block_url(size, block_id);
 }
 
-void Upload::bput_url(QString ctx, int offset)
+BlockInfo Upload::getMultipartUploadResult(QByteArray data, int i, QString uuid)
 {
-    bputUrl = QString("%1/bput/%2/%3").arg(uploadInfo.result.uploadUrl).arg(ctx).arg(offset);
-}
+    BlockInfo blockInfo;
+    QJsonParseError Error;
+    QJsonDocument Json = QJsonDocument::fromJson(data, &Error);
+    if(Error.error == QJsonParseError::NoError){
+        if(Json.isObject()){
 
-void Upload::block_url(int size, int block_num)
-{
-    blockUrl = QString("%1/mkblk/%2/%3").arg(uploadInfo.result.uploadUrl).arg(size).arg(block_num);
-}
+            QJsonObject fileInfo = Json.object();
+            if(fileInfo.contains("ctx")){
+                QJsonValue ctx = fileInfo.value("ctx");
+                if(ctx.isString())
+                    blockInfo.ctx = ctx.toString();
+            }
 
-void Upload::file_url()
-{
-    fileUrl = QString("%1/mkfile/%2").arg(uploadInfo.result.uploadUrl).arg(file_size);
+            if(fileInfo.contains("checksum")){
+                QJsonValue checksum = fileInfo.value("checksum");
+                if(checksum.isString())
+                    blockInfo.checksum = checksum.toString();
+            }
+
+            if(fileInfo.contains("crc32")){
+                QJsonValue crc32 = fileInfo.value("crc32");
+                if(crc32.isDouble())
+                    blockInfo.crc32 = crc32.toInt();
+            }
+
+            if(fileInfo.contains("offset")){
+                QJsonValue offset = fileInfo.value("offset");
+                if(offset.isDouble())
+                    blockInfo.offset = offset.toInt();
+            }
+            blockInfo.BlockNumber = i;
+            blockInfo.uuid = uuid;
+        }
+    }
+    return blockInfo;
 }
 
 void Upload::getUploadInfo(QByteArray ba)

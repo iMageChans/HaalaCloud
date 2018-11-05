@@ -6,10 +6,6 @@ FileSplitUtils::FileSplitUtils(){
 
 }
 
-FileSplitUtils::~FileSplitUtils(){
-
-}
-
 bool FileSplitUtils::islegalFilePath(const QString& path){
     if(path.isEmpty()){
         return false;
@@ -43,19 +39,11 @@ bool FileSplitUtils::islegalSplitSize(const QString& path,const qint64 splitSize
 }
 
 qint64 FileSplitUtils::getBlockFileSize(){
-
-    if(!size.isEmpty()){
-        return 4 * 1024 * 1024;
-    }
-    return 0;
+    return 4 * 1024 * 1024;
 }
 
 qint64 FileSplitUtils::getBputFileSize(){
-
-    if(!size.isEmpty()){
-        return 512 * 1024;
-    }
-    return 0;
+    return 512 * 1024;
 }
 
 
