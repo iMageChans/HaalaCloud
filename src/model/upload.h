@@ -6,20 +6,13 @@
 #include "src/util/configsetting.h"
 
 typedef struct{
-    int Bput_number;
-    int Bput_count;
-    int Bput_Size;
-    char bput;
-}Bput;
-
-typedef struct{
-    int Block_number;
-    int Block_count;
-    int Block_Size;
+    QString ctx;
+    QString checksum;
     QString uuid;
-    Bput bput;
-    Bput bputArray[];
-}Block;
+    int crc32;
+    int offset;
+    int BlockNumber;
+}BlockInfo;
 
 typedef struct{
     QString name;
@@ -45,29 +38,19 @@ class Upload : public QObject
 public:
     explicit Upload(QObject *parent = nullptr);
     void setUploadConfig(QString filesPath);
-    void make_block(int offset);
+    void Run();
 signals:
 
 public slots:
 
 private:
     uint block_size;
-    int bput_size;
+    uint concurrency;
+
     qint64 file_size;
-    QString path;
     QString file_name;
     QString file_path;
-    uint progress;
-    uint concurrency;
-    int block_number;
-    int size;
-    QString token;
-    QString url;
-
-    QString bputUrl;
-    QString blockUrl;
-    QString fileUrl;
-    int block_id;
+    QString path;
 
     upload_result uploadInfo;
 
@@ -76,12 +59,7 @@ private:
     ConfigSetting *setting;
 
     void getUploadInfo(QByteArray ba);
-    void bput_url(QString ctx, int offset);
-    void block_url(int size, int bolck_num);
-    void file_url();
-    void mlk_url(int offset);
-    void create_block(QDataStream &block_file, char &buff);
-    void create_bput(QDataStream &bput_file, char &bput_buff);
+    BlockInfo getMultipartUploadResult(QByteArray data, int i, QString uuid);
 };
 
 #endif // UPLOAD_H

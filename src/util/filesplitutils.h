@@ -1,6 +1,7 @@
 ﻿#ifndef FILESPLITUTILS_H
 #define FILESPLITUTILS_H
 
+#include <QString>
 
 class FileSplitUtils{
 

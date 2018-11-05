@@ -225,7 +225,7 @@ QNetworkReply::NetworkError WebServiceHelp:: sendPostRequest(QString website, QS
 
 QNetworkReply::NetworkError WebServiceHelp:: uploadRequest(QString website, QString uuid, QString Token, const QByteArray &postBa, QByteArray &retBa, int timeOutms)
 {
-    QString urlStr =website;
+    QString urlStr = website;
     QNetworkReply::NetworkError retError = QNetworkReply::NoError;
     m_errCode= QNetworkReply::NoError;
     QByteArray bearer;
@@ -234,7 +234,7 @@ QNetworkReply::NetworkError WebServiceHelp:: uploadRequest(QString website, QStr
     config.setPeerVerifyMode(QSslSocket::VerifyNone);
     config.setProtocol(QSsl::TlsV1SslV3);
     request.setSslConfiguration(config);
-     QUrl url(QString("https://upload-vod-v1.qiecdn.com%1").arg(urlStr));
+    QUrl url(QString("%1").arg(urlStr));
     request.setUrl(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader,"application/json");
     request.setHeader(QNetworkRequest::ContentLengthHeader,postBa.length());
