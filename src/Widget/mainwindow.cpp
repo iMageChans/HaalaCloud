@@ -36,11 +36,6 @@ MainWindow::MainWindow(QWidget *parent) :
     setAllFilesList();
     setUploadList();
 
-
-    FileDownloadThread *FDT = new FileDownloadThread;
-    connect(FDT, SIGNAL(transfer(QList<FilesStatusInfo>)), this, SLOT(updateUploadList(QList<FilesStatusInfo>)));
-    connect(FDT, SIGNAL(finished()), FDT, SLOT(deleteLater()));
-    FDT->start();
     setting = new ConfigSetting;
 }
 
