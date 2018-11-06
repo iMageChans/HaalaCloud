@@ -8,9 +8,9 @@ ProgressList::ProgressList(QWidget *parent) :
     ui->setupUi(this);
     TableView = new QTableView(this);
     TableView->setSelectionBehavior(QAbstractItemView::SelectRows);
-    TableView->horizontalHeader()->setStretchLastSection(true);
-    TableView->horizontalHeader()->setHighlightSections(false);
-    TableView->verticalHeader()->setVisible(false);
+//    TableView->horizontalHeader()->setStretchLastSection(true);
+//    TableView->horizontalHeader()->setHighlightSections(false);
+//    TableView->verticalHeader()->setVisible(false);
     TableView->setShowGrid(false);
     TableView->setFrameShape(QFrame::NoFrame);
     TableView->setSelectionMode(QAbstractItemView::SingleSelection);

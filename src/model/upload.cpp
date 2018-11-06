@@ -101,7 +101,7 @@ void Upload::Run()
                   }
             }
         }
-        delete buff;
+        delete[] buff;
         srcFile.close();
         QStringList ctxs;
         QStringList ctxSizes;

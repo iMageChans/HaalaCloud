@@ -63,6 +63,9 @@ void MainWindow::setUploadList()
 {
     uploadModel = new ProgressModel;
     FilesHeaderView *pHeader = new FilesHeaderView(Qt::Horizontal, this);
+    pHeader->setStretchLastSection(true);
+    pHeader->setHighlightSections(false);
+    pHeader->setVisible(false);
 
     sendView->Upload->TableView->setHorizontalHeader(pHeader);
     sendView->Upload->TableView->setModel(uploadModel);
